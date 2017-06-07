@@ -281,14 +281,20 @@ thumbnail_bbox = (int(thumbnail_x_min), int(thumbnail_y_min), int(thumbnail_x_ma
 thumbnail_png = png.crop(thumbnail_bbox)
 thumbnail_png.load()
 thumbnail_png.thumbnail((300, 300), Image.ANTIALIAS)
-thumbnail_png.save(os.path.join(output_path, sample_name + '.classification.thumbnail.png'))
+
+thumbnail_path = os.path.join(output_path, sample_name + '.classification.thumbnail.png')
+thumbnail_png.save(thumbnail_path)
 
 # Add the circle to the original image and save
 draw.arc([(0.0, 0.0), field_size], 0, 360, black)
-png.save(os.path.join(output_path, sample_name + '.classification.png'))
+
+classification_path = os.path.join(output_path, sample_name + '.classification.png')
+png.save(classification_path)
 
 del draw
 del png
 del thumbnail_png
 
 shutil.rmtree(working_directory)
+print(thumbnail_path)
+print(classification_path)
