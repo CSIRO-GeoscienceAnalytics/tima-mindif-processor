@@ -1,0 +1,10 @@
+name: tima
+channels:
+  - default
+dependencies:
+  - python=2.7
+  - PIL
+  - pip:
+      #Dev
+      - pylint
+      - autopep8
