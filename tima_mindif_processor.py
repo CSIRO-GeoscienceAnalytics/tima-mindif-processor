@@ -309,4 +309,7 @@ del draw
 del png
 del thumbnail_png
 
-shutil.rmtree(working_directory)
+try:
+    shutil.rmtree(working_directory)
+except:
+    print "WARNING: Working directory couldn't be removed automatically. Please delete manually"
