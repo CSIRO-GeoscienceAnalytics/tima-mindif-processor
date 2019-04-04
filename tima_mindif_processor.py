@@ -45,6 +45,7 @@ def get_percent_text(value):
     return "{:4.2f}".format(value)
 
 def unzip(zipFilePath, destDir):
+
     zfile = zipfile.ZipFile(zipFilePath)
     top_level_name = ''
     for name in zfile.namelist():
@@ -65,6 +66,16 @@ def unzip(zipFilePath, destDir):
     return top_level_name
 
 
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+
 def zip(sourceDir, destinationZipFile):
     zfile = zipfile.ZipFile(destinationZipFile, 'w', zipfile.ZIP_DEFLATED)
 
@@ -81,21 +92,21 @@ def zip(sourceDir, destinationZipFile):
 output_root = os.path.join(script_path, 'output')
 zip_path = sys.argv[1]
 
-sample_name = zip_path.replace('.zip', '')
-
 working_directory = os.path.join(script_path, 'working')
-
 if(os.path.exists(working_directory)):
     shutil.rmtree(working_directory)
 
 os.mkdir(working_directory)
 log_variable("Working directory", working_directory)
 
-unzip(zip_path, working_directory)
+if(os.path.isdir(zip_path)):
+    copytree(zip_path, working_directory)
+    sample_name = zip_path
+else:
+    sample_name = zip_path.replace('.zip', '')
+    unzip(zip_path, working_directory)
 
 log_variable("Sample Name", sample_name)
-
-zf = zipfile.ZipFile(zip_path, 'r')
 
 mindif_path = os.path.join(working_directory, os.listdir(working_directory)[0])
 
