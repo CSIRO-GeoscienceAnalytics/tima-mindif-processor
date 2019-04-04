@@ -22,7 +22,7 @@ import copy
 import re
 import shutil
 
-verbose = False
+verbose = True
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -50,12 +50,13 @@ def unzip(zipFilePath, destDir):
     for name in zfile.namelist():
         top_level_name = name if top_level_name == '' else top_level_name
         (dirName, fileName) = os.path.split(name)
-        if fileName == '':
-            # directory
-            newDir = os.path.join(destDir, dirName)
-            if not os.path.exists(newDir):
-                os.mkdir(newDir)
-        else:
+
+        # directory
+        newDir = os.path.join(destDir, dirName)
+        if not os.path.exists(newDir):
+            os.mkdir(newDir)
+
+        if fileName is not '':
             # file
             fd = open(os.path.join(destDir, name), 'wb')
             fd.write(zfile.read(name))
@@ -83,6 +84,10 @@ zip_path = sys.argv[1]
 sample_name = zip_path.replace('.zip', '')
 
 working_directory = os.path.join(script_path, 'working')
+
+if(os.path.exists(working_directory)):
+    shutil.rmtree(working_directory)
+
 os.mkdir(working_directory)
 log_variable("Working directory", working_directory)
 
@@ -92,8 +97,7 @@ log_variable("Sample Name", sample_name)
 
 zf = zipfile.ZipFile(zip_path, 'r')
 
-mindif_path = os.path.join(working_directory, zf.infolist()[
-                           0].filename.replace('/', ''))
+mindif_path = os.path.join(working_directory, os.listdir(working_directory)[0])
 
 output_path = os.path.join(output_root, sample_name)
 if not os.path.exists(output_path):
@@ -120,6 +124,7 @@ log_variable('Legend text X Offset', legend_text_x_offset)
 
 # Extract the phases from phases.xml and use it to create the colour map:
 xml_path = ''
+log_variable('Mindif Path:', mindif_path)
 for root, dirs, files in os.walk(mindif_path):
     for file in files:
         if file == "phases.xml":
@@ -136,12 +141,21 @@ if not xml_path:
 
 phases_xml_path = os.path.join(xml_path, "phases.xml")
 phases_xml = ET.parse(phases_xml_path)
-phase_nodes = phases_xml.getroot()[0]
+
+for el in list(phases_xml.getroot()):
+    if('PrimaryPhases' in el.tag):
+        phase_nodes = el
+        break
+
+if phase_nodes is None:
+    print "ERROR: No element in phases.xml called PrimaryPhases"
+    sys.exit()
 
 largest_name_width = 0
 phase_map = {}
 
 log_message('Extracting phases from {0}'.format(phases_xml_path))
+
 for phase_node in phase_nodes:
     if phase_node.get('background') == 'yes':
         continue
@@ -152,7 +166,8 @@ for phase_node in phase_nodes:
 
     colour_str = phase_node.get('color')
     mass = float(phase_node.get('mass'))
-
+    print "phase_id: {} mineral_name: {} colour_str: {} mass: {}".format(
+        phase_id, mineral_name, colour_str, mass)
     phase_map[phase_id] = {
         'mineral_name': mineral_name,
         'colour': (
