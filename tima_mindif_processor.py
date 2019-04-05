@@ -278,7 +278,7 @@ for guid, sample_name in guid_and_sample_name.iteritems():
         del thumbnail_png
 
     # Add the circle to the original image and save
-    draw.arc([0.0, 0.0, field_size[0], field_size[1]], 0, 360, black)
+    draw.arc([0, 0, field_size[0], field_size[1]], 0, 360, black)
     png.save(classification_path)
 
     del draw
