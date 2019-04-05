@@ -23,10 +23,10 @@ conda activate tima
 ```
 
 The script should be executed in the following manner:
-./tima_mindif_processor.py project/path mindif_root output_root
+python tima_mindif_processor.py project/path mindif_root output_root
 
 For example:
 
 ```
-./tima_mindif_processor.py "/media/sf_Y_DRIVE/Data/Evolution" "/media/sf_Y_DRIVE/Data/Adam Brown" "output"
+python tima_mindif_processor.py "/media/sf_Y_DRIVE/Data/Evolution" "/media/sf_Y_DRIVE/Data/Adam Brown" "output"
 ```
