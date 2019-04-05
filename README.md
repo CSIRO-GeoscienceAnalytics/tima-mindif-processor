@@ -22,14 +22,11 @@ Or if that doesn't work
 conda activate tima
 ```
 
-Then
+The script should be executed in the following manner:
+./tima_mindif_processor.py project/path mindif_root output_root
+
+For example:
 
 ```
-python tima_mindif_processor.py <Path to Zip File>
+./tima_mindif_processor.py "/media/sf_Y_DRIVE/Data/Evolution" "/media/sf_Y_DRIVE/Data/Adam Brown" "output"
 ```
-
-The results will go in a foler called "output"
-
-## Troubleshooting
-
-You may get a warning to delete the working directory manuelly after a successful run.
