@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # The purpose of this script is to process a provided MinDIF dataset, and during the process carry out these actions:
-#   1. Create a classification image in full resolution with a legend. 
+#   1. Create a classification image in full resolution with a legend.
 #
 # The script should be executed in the following manner:
 #   ./tima_mindif_processor.py project/path mindif_root output_root
@@ -9,17 +9,14 @@
 # For example:
 #   ./tima_mindif_processor.py "/media/sf_Y_DRIVE/Data/Evolution" "/media/sf_Y_DRIVE/Data/Adam Brown" "output"
 
-import os.path
-import datetime
-import sys
 import os
+import os.path
+import sys
 import math
-from PIL import Image, ImageDraw, ImageFont
-import xml.etree.ElementTree as ET
-from pprint import pprint
-import copy
 import re
-import shutil
+import copy
+import xml.etree.ElementTree as ET
+from PIL import Image, ImageDraw, ImageFont
 
 verbose = True
 create_thumbnail = False
@@ -27,26 +24,34 @@ create_thumbnail = False
 script_path = os.path.dirname(os.path.realpath(__file__))
 
 # Helper methods:
+
+
 def log_variable(name, value):
     if verbose:
         print("{0}: {1}".format(name, value))
 
+
 def log_message(message):
     if verbose:
         print(message)
+
 
 def get_percent_text(value):
     if value < 0.01:
         return "<0.01"
     return "{:4.2f}".format(value)
 
+
 # Parse arguments:
 project_path = sys.argv[1]
 mindif_root = sys.argv[2]
 output_root = sys.argv[3]
-project_name = project_path[project_path.rfind('/') + 1:]
+project_name = os.path.split(project_path)[1]
 
-surveys_xml_path = os.path.join(project_path, project_name + '.timaproj.Surveys', 'Surveys.xml')
+print "Project Name: {}".format(project_name)
+
+surveys_xml_path = os.path.join(
+    project_path, project_name + '.timaproj.Surveys', 'Surveys.xml')
 surveys_xml = ET.parse(surveys_xml_path)
 survey_group = surveys_xml.getroot()
 
@@ -55,7 +60,8 @@ guid_and_sample_name = {}
 for survey in survey_group.iterfind('Survey'):
     for replicate in survey.iterfind('Replicate'):
         for dataset in replicate.iterfind('Dataset'):
-            guid_and_sample_name[dataset.get('guid')[1:37]] = replicate.get('caption')
+            guid_and_sample_name[dataset.get(
+                'guid')[1:37]] = replicate.get('caption')
 
 for guid, sample_name in guid_and_sample_name.iteritems():
     log_variable("Sample Name", sample_name)
@@ -63,25 +69,27 @@ for guid, sample_name in guid_and_sample_name.iteritems():
     classification_path = os.path.join(output_root, sample_name + '.png')
 
     if os.path.exists(classification_path):
-        print("NOTICE: skipping " + guid + " because an image already exists for it.")
+        print("NOTICE: skipping " + guid +
+              " because an image already exists for it.")
         continue
 
-    mindif_path =  os.path.join(mindif_root, guid)
+    mindif_path = os.path.join(mindif_root, guid)
 
     # Constants / Readonly:
-    namespace =  'http://www.tescan.cz/tima/1_4' # TODO: make namespace dynamic
+    namespace = 'http://www.tescan.cz/tima/1_4'  # TODO: make namespace dynamic
     xml_namespace = '{{{0}}}'.format(namespace) if namespace else ''
-    
+
     namespaces = {'tescan': namespace}
     white = (255, 255, 255)
     black = (0, 0, 0)
 
     font_size = 24
     font_path = os.path.join(script_path, 'fonts')
-    font = ImageFont.truetype(os.path.join(font_path, 'DejaVuSansMono.ttf'), font_size)
+    font = ImageFont.truetype(os.path.join(
+        font_path, 'DejaVuSansMono.ttf'), font_size)
 
     legend_line_height = int(math.ceil(font_size * 1.3))
-    legend_text_x_offset = legend_line_height * 2 - font_size 
+    legend_text_x_offset = legend_line_height * 2 - font_size
 
     log_variable('Font Size', font_size)
     log_variable('Legend Line Height', legend_line_height)
@@ -92,32 +100,35 @@ for guid, sample_name in guid_and_sample_name.iteritems():
     for root, dirs, files in os.walk(mindif_path):
         for file in files:
             if file == "phases.xml":
-                 xml_path = root
-                 break
+                xml_path = root
+                break
 
         if xml_path:
             break
 
     if not xml_path:
-        print("WARNING: phases.xml was not found in " + mindif_path + " or the directory does not exist.")
+        print("WARNING: phases.xml was not found in " +
+              mindif_path + " or the directory does not exist.")
         continue
 
     phases_xml_path = os.path.join(xml_path, "phases.xml")
     phases_xml = ET.parse(phases_xml_path)
-    phase_nodes = phases_xml.getroot().find('{0}PrimaryPhases'.format(xml_namespace))
+    phase_nodes = phases_xml.getroot().find(
+        '{0}PrimaryPhases'.format(xml_namespace))
     largest_name_width = 0
     phase_map = {}
 
     log_message('Extracting phases from {0}'.format(phases_xml_path))
     for phase_node in phase_nodes:
         mineral_name = phase_node.get('name')
-    
+
         if phase_node.get('background') == 'yes' or mineral_name == '[Unclassified]':
             continue
 
         phase_id = int(phase_node.get('id'))
 
-        largest_name_width = max(largest_name_width, font.getsize(mineral_name)[0])
+        largest_name_width = max(
+            largest_name_width, font.getsize(mineral_name)[0])
 
         colour_str = phase_node.get('color')
         mass = float(phase_node.get('mass'))
@@ -140,19 +151,25 @@ for guid, sample_name in guid_and_sample_name.iteritems():
     measurement_xml = ET.parse(measurement_xml_path)
     measurement_nodes = measurement_xml.getroot()
 
-    measurement_guid = measurement_nodes.findtext('{0}Id'.format(xml_namespace))
+    measurement_guid = measurement_nodes.findtext(
+        '{0}Id'.format(xml_namespace))
     measurement_guid = re.sub('[^[a-f0-9]', '', measurement_guid)
 
-    software_version = measurement_nodes.findtext('{0}Origin'.format(xml_namespace))
+    software_version = measurement_nodes.findtext(
+        '{0}Origin'.format(xml_namespace))
 
-    view_field_um = int(measurement_nodes.findtext('{0}ViewField'.format(xml_namespace)))
-    image_width_px = int(measurement_nodes.findtext('{0}ImageWidth'.format(xml_namespace)))
-    image_height_px = int(measurement_nodes.findtext('{0}ImageHeight'.format(xml_namespace)))
-    sample_diameter_um = int(measurement_nodes                \
-        .find('tescan:SampleDef', namespaces)                 \
-        .findtext('{0}SampleDiameter'.format(xml_namespace)))
+    view_field_um = int(measurement_nodes.findtext(
+        '{0}ViewField'.format(xml_namespace)))
+    image_width_px = int(measurement_nodes.findtext(
+        '{0}ImageWidth'.format(xml_namespace)))
+    image_height_px = int(measurement_nodes.findtext(
+        '{0}ImageHeight'.format(xml_namespace)))
+    sample_diameter_um = int(measurement_nodes
+                             .find('tescan:SampleDef', namespaces)
+                             .findtext('{0}SampleDiameter'.format(xml_namespace)))
 
-    diameter_px = int((sample_diameter_um / float(view_field_um)) * image_width_px)
+    diameter_px = int(
+        (sample_diameter_um / float(view_field_um)) * image_width_px)
 
     field_size = (diameter_px, diameter_px)
 
@@ -161,7 +178,8 @@ for guid, sample_name in guid_and_sample_name.iteritems():
     legend_start_x = int(math.ceil(diameter_px + 30))
 
     # this is the x value that the numeric value must STOP at.
-    percent_right_x = diameter_px + legend_text_x_offset + largest_name_width + max_numeric_width + legend_line_height - font_size
+    percent_right_x = diameter_px + legend_text_x_offset + \
+        largest_name_width + max_numeric_width + legend_line_height - font_size
     canvas_size = (percent_right_x, diameter_px)
     outline_thickness = math.ceil(diameter_px / 1000)
     origin = (field_size[0]/2, field_size[1]/2)
@@ -181,8 +199,10 @@ for guid, sample_name in guid_and_sample_name.iteritems():
         # The x and y values are the offset from the origin.
         # TIMA uses +x to mean left, which is opposite to monitor coordinate system, so this value gets inverted.
         # and       +y to mean down, which is the same as monitor coordinate system, so this value doesn't get inverted.
-        x = round(-float(field_node.get('x')) / pixel_spacing + origin[0] - (image_width_px / 2))
-        y = round(float(field_node.get('y')) / pixel_spacing + origin[1] - (image_height_px / 2))
+        x = round(-float(field_node.get('x')) / pixel_spacing +
+                  origin[0] - (image_width_px / 2))
+        y = round(float(field_node.get('y')) / pixel_spacing +
+                  origin[1] - (image_height_px / 2))
 
         fields.append((field_name, x, y))
 
@@ -204,15 +224,18 @@ for guid, sample_name in guid_and_sample_name.iteritems():
         field_phase_map = copy.deepcopy(empty_phase_map)
 
         try:
-            phases = Image.open(field_path_format.format(field_name, 'phases.tif'))
+            phases = Image.open(
+                field_path_format.format(field_name, 'phases.tif'))
         except:
-            print('Error: ' + guid + ", " + sample_name + ', field ' + field_name + " does not have phases.tif")
+            print('Error: ' + guid + ", " + sample_name + ', field ' +
+                  field_name + " does not have phases.tif")
             has_missing_file = True
 
         try:
             mask = Image.open(field_path_format.format(field_name, 'mask.png'))
         except:
-            print('Error: ' + guid + ", " + sample_name + ', field ' + field_name + " does not have mask.png")
+            print('Error: ' + guid + ", " + sample_name +
+                  ', field ' + field_name + " does not have mask.png")
             has_missing_file = True
 
         if has_missing_file:
@@ -229,7 +252,8 @@ for guid, sample_name in guid_and_sample_name.iteritems():
                     png_x = x + field_x
                     png_y = y + field_y
 
-                    png_array[x + field_x, y + field_y] = phase_map[phase_index]['colour']
+                    png_array[x + field_x, y +
+                              field_y] = phase_map[phase_index]['colour']
 
                     thumbnail_x_min = min(thumbnail_x_min, png_x)
                     thumbnail_x_max = max(thumbnail_x_max, png_x)
@@ -241,10 +265,12 @@ for guid, sample_name in guid_and_sample_name.iteritems():
                     field_phase_map[phase_index]['histogram'] += 1
 
         # Once all the pixels have been dealt with we can create the insert commands for this field:
-        field_phase_map = {k: v for k, v in field_phase_map.iteritems() if v['histogram'] != 0}
-     
+        field_phase_map = {
+            k: v for k, v in field_phase_map.iteritems() if v['histogram'] != 0}
+
         # TODO: this is a waste, all I really want to do is change from dict to list
-        field_phase_map = sorted(field_phase_map.items(), key = lambda x: x[1]['histogram'], reverse = True)
+        field_phase_map = sorted(field_phase_map.items(
+        ), key=lambda x: x[1]['histogram'], reverse=True)
 
     if has_missing_file:
         print('Error: not processing ' + guid + ' due to missing files.')
@@ -254,23 +280,29 @@ for guid, sample_name in guid_and_sample_name.iteritems():
     phase_map = {k: v for k, v in phase_map.iteritems() if v['histogram'] != 0}
 
     # Sort phase_map entries by histogram highest to lowest
-    phase_map = sorted(phase_map.items(), key = lambda x: x[1]['histogram'], reverse = True)
+    phase_map = sorted(phase_map.items(),
+                       key=lambda x: x[1]['histogram'], reverse=True)
 
     draw = ImageDraw.Draw(png)
 
     y = 0
     for id, phase_map_entry in phase_map:
-        draw.rectangle([(legend_start_x, y), (legend_start_x + legend_line_height, y + legend_line_height)], fill=phase_map_entry['colour'])
-        draw.text((legend_start_x + legend_text_x_offset, y), phase_map_entry['mineral_name'], black, font = font)
-        text = get_percent_text(float(phase_map_entry['histogram']) / classified_pixel_count * 100)
-        draw.text((percent_right_x - font.getsize(text)[0], y), text, black, font=font)
+        draw.rectangle([(legend_start_x, y), (legend_start_x + legend_line_height,
+                                              y + legend_line_height)], fill=phase_map_entry['colour'])
+        draw.text((legend_start_x + legend_text_x_offset, y),
+                  phase_map_entry['mineral_name'], black, font=font)
+        text = get_percent_text(
+            float(phase_map_entry['histogram']) / classified_pixel_count * 100)
+        draw.text((percent_right_x - font.getsize(text)
+                   [0], y), text, black, font=font)
         y += legend_line_height
 
     if not os.path.exists(output_root):
         os.makedirs(output_root)
 
     if create_thumbnail:
-        thumbnail_bbox = (int(thumbnail_x_min), int(thumbnail_y_min), int(thumbnail_x_max), int(thumbnail_y_max))
+        thumbnail_bbox = (int(thumbnail_x_min), int(
+            thumbnail_y_min), int(thumbnail_x_max), int(thumbnail_y_max))
         thumbnail_png = png.crop(thumbnail_bbox)
         thumbnail_png.load()
         thumbnail_png.thumbnail((300, 300), Image.ANTIALIAS)
