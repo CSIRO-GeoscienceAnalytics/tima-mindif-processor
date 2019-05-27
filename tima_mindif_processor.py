@@ -193,18 +193,22 @@ for guid, sample_name in guid_and_sample_name.iteritems():
     field_dir = fields_xml_root.find('tescan:FieldDir', namespaces).text
 
     fields = []
-    for field_node in field_nodes:
-        field_name = field_node.get('name')
+    if field_nodes is not None:
+        for field_node in field_nodes:
+            field_name = field_node.get('name')
 
-        # The x and y values are the offset from the origin.
-        # TIMA uses +x to mean left, which is opposite to monitor coordinate system, so this value gets inverted.
-        # and       +y to mean down, which is the same as monitor coordinate system, so this value doesn't get inverted.
-        x = round(-float(field_node.get('x')) / pixel_spacing +
-                  origin[0] - (image_width_px / 2))
-        y = round(float(field_node.get('y')) / pixel_spacing +
-                  origin[1] - (image_height_px / 2))
+            # The x and y values are the offset from the origin.
+            # TIMA uses +x to mean left, which is opposite to monitor coordinate system, so this value gets inverted.
+            # and       +y to mean down, which is the same as monitor coordinate system, so this value doesn't get inverted.
+            x = round(-float(field_node.get('x')) / pixel_spacing +
+                      origin[0] - (image_width_px / 2))
+            y = round(float(field_node.get('y')) / pixel_spacing +
+                      origin[1] - (image_height_px / 2))
 
-        fields.append((field_name, x, y))
+            fields.append((field_name, x, y))
+    else:
+        print('WARNING: ' + guid + ", " + sample_name +
+              ' does not have any tescan:Fields in the fields.xml file')
 
     # Prepare new canvas:
     png = Image.new('RGB', canvas_size, white)
@@ -310,7 +314,7 @@ for guid, sample_name in guid_and_sample_name.iteritems():
         del thumbnail_png
 
     # Add the circle to the original image and save
-    #draw.arc([0, 0, field_size[0], field_size[1]], 0, 360, black)
+    # draw.arc([0, 0, field_size[0], field_size[1]], 0, 360, black)
     png.save(classification_path)
 
     del draw
