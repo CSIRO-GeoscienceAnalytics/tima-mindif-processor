@@ -266,23 +266,28 @@ for guid, sample_name in guid_and_sample_name.iteritems():
 
         for y in range(0, image_height_px):
             for x in range(0, image_width_px):
-                phase_index = phases_array[x, y]
-                mask_index = mask_array[x, y]
-                if phase_index != 0 and mask_index != 0:
-                    png_x = x + field_x
-                    png_y = y + field_y
+                try:
+                    phase_index = phases_array[x, y]
+                    mask_index = mask_array[x, y]
+                    if phase_index != 0 and mask_index != 0:
+                        png_x = x + field_x
+                        png_y = y + field_y
 
-                    png_array[x + field_x, y +
-                              field_y] = phase_map[phase_index]['colour']
+                        png_array[x + field_x, y +
+                                  field_y] = phase_map[phase_index]['colour']
 
-                    thumbnail_x_min = min(thumbnail_x_min, png_x)
-                    thumbnail_x_max = max(thumbnail_x_max, png_x)
-                    thumbnail_y_min = min(thumbnail_y_min, png_y)
-                    thumbnail_y_max = max(thumbnail_y_max, png_y)
+                        thumbnail_x_min = min(thumbnail_x_min, png_x)
+                        thumbnail_x_max = max(thumbnail_x_max, png_x)
+                        thumbnail_y_min = min(thumbnail_y_min, png_y)
+                        thumbnail_y_max = max(thumbnail_y_max, png_y)
 
-                    classified_pixel_count += 1
-                    phase_map[phase_index]['histogram'] += 1
-                    field_phase_map[phase_index]['histogram'] += 1
+                        classified_pixel_count += 1
+                        phase_map[phase_index]['histogram'] += 1
+                        field_phase_map[phase_index]['histogram'] += 1
+                except IndexError as exc:
+                    print "Index out of bounds in phase/mask loop x: {} y: {}".format(
+                        x, y)
+                    break
 
         # Once all the pixels have been dealt with we can create the insert commands for this field:
         field_phase_map = {
