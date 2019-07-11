@@ -164,29 +164,30 @@ for guid, sample_name in guid_and_sample_name.iteritems():
         '{0}ImageWidth'.format(xml_namespace)))
     image_height_px = int(measurement_nodes.findtext(
         '{0}ImageHeight'.format(xml_namespace)))
-    sample_shape = measurement_nodes.find('tescan:SampleDef', namespaces).findtext('{0}SampleShape'.format(xml_namespace))
-    
+    sample_shape = measurement_nodes.find('tescan:SampleDef', namespaces).findtext(
+        '{0}SampleShape'.format(xml_namespace))
+
     if sample_shape == "Rectangle":
-      sample_width_um = int(measurement_nodes
-                            .find('tescan:SampleDef', namespaces)
-                            .findtext('{0}SampleWidth'.format(xml_namespace)))
-      sample_height_um = int(measurement_nodes
-                            .find('tescan:SampleDef', namespaces)
-                            .findtext('{0}SampleHeight'.format(xml_namespace)))
-      sample_width_px = int(
-        (sample_width_um / float(view_field_um)) * image_width_px)
-      sample_height_px = int(
-        (sample_height_um / float(view_field_um)) * image_height_px)
-      field_size = (sample_width_px, sample_height_px)
+        sample_width_um = int(measurement_nodes
+                              .find('tescan:SampleDef', namespaces)
+                              .findtext('{0}SampleWidth'.format(xml_namespace)))
+        sample_height_um = int(measurement_nodes
+                               .find('tescan:SampleDef', namespaces)
+                               .findtext('{0}SampleHeight'.format(xml_namespace)))
+        sample_width_px = int(
+            (sample_width_um / float(view_field_um)) * image_width_px)
+        sample_height_px = int(
+            (sample_height_um / float(view_field_um)) * image_height_px)
+        field_size = (sample_width_px, sample_height_px)
 
     else:
-      # Must be a circle
-      sample_diameter_um = int(measurement_nodes
-                            .find('tescan:SampleDef', namespaces)
-                            .findtext('{0}SampleDiameter'.format(xml_namespace)))
-      diameter_px = int(
-        (sample_diameter_um / float(view_field_um)) * image_width_px)
-      field_size = (diameter_px, diameter_px)
+        # Must be a circle
+        sample_diameter_um = int(measurement_nodes
+                                 .find('tescan:SampleDef', namespaces)
+                                 .findtext('{0}SampleDiameter'.format(xml_namespace)))
+        diameter_px = int(
+            (sample_diameter_um / float(view_field_um)) * image_width_px)
+        field_size = (diameter_px, diameter_px)
 
     # To right-align the numeric values we use "< 0.01" as the longest string then work out the offset from that.
     max_numeric_width = font.getsize("<0.01")[0]
