@@ -164,7 +164,7 @@ for guid, sample_name in guid_and_sample_name.iteritems():
         '{0}ImageWidth'.format(xml_namespace)))
     image_height_px = int(measurement_nodes.findtext(
         '{0}ImageHeight'.format(xml_namespace)))
-    sample_shape = measurement_nodes.find('tescan:SampleDef', namespaces).findtext('{0}SampleDiameter'.format(xml_namespace))
+    sample_shape = measurement_nodes.find('tescan:SampleDef', namespaces).findtext('{0}SampleShape'.format(xml_namespace))
     
     if sample_shape == "Rectangle":
       sample_width_um = int(measurement_nodes
