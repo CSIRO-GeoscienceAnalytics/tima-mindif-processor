@@ -176,8 +176,9 @@ for guid, sample_name in guid_and_sample_name.iteritems():
       sample_width_px = int(
         (sample_width_um / float(view_field_um)) * image_width_px)
       sample_height_px = int(
-        (sample_height_um / float(view_field_um)) * image_width_px)
+        (sample_height_um / float(view_field_um)) * image_height_px)
       field_size = (sample_width_px, sample_height_px)
+
     else:
       # Must be a circle
       sample_diameter_um = int(measurement_nodes
@@ -189,13 +190,13 @@ for guid, sample_name in guid_and_sample_name.iteritems():
 
     # To right-align the numeric values we use "< 0.01" as the longest string then work out the offset from that.
     max_numeric_width = font.getsize("<0.01")[0]
-    legend_start_x = int(math.ceil(diameter_px + 30))
+    legend_start_x = int(math.ceil(field_size[0] + 30))
 
     # this is the x value that the numeric value must STOP at.
-    percent_right_x = diameter_px + legend_text_x_offset + \
+    percent_right_x = field_size[0] + legend_text_x_offset + \
         largest_name_width + max_numeric_width + legend_line_height - font_size
-    canvas_size = (percent_right_x, diameter_px)
-    outline_thickness = math.ceil(diameter_px / 1000)
+    canvas_size = (percent_right_x, field_size[1])
+    outline_thickness = math.ceil(field_size[0] / 1000)
     origin = (field_size[0]/2, field_size[1]/2)
     pixel_spacing = float(view_field_um) / float(image_width_px)
 
