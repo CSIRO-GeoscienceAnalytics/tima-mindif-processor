@@ -17,7 +17,7 @@ import copy
 import xml.etree.ElementTree as ET
 from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
-from .utils import log_variable, log_message, get_percent_text, create_thumbnail
+from .utils import get_percent_text, create_thumbnail
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -39,7 +39,7 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         )
 
     for guid, sample_name in guid_and_sample_name:
-        log_variable("Sample Name", sample_name)
+        logger.debug("Sample Name: {}", sample_name)
         thumbnail_path = os.path.join(output_root, sample_name + ".thumbnail.png")
         classification_path = os.path.join(output_root, sample_name + ".png")
 
@@ -61,9 +61,9 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         legend_line_height = int(math.ceil(font_size * 1.3))
         legend_text_x_offset = legend_line_height * 2 - font_size
 
-        log_variable("Font Size", font_size)
-        log_variable("Legend Line Height", legend_line_height)
-        log_variable("Legend text X Offset", legend_text_x_offset)
+        logger.debug("Font Size: {}", font_size)
+        logger.debug("Legend Line Height: {}", legend_line_height)
+        logger.debug("Legend text X Offset: {}", legend_text_x_offset)
 
         # Extract the phases from phases.xml and use it to create the colour map:
         xml_path = ""
