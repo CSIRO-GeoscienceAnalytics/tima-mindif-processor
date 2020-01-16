@@ -2,8 +2,8 @@ name: tima
 channels:
   - default
 dependencies:
-  - python=2.7
-  - PIL
+  - python=3.6
+  - pillow
   - pip:
       #Dev
       - pylint

@@ -1,0 +1,11 @@
+# Include the Readme files
+include *.md
+
+# Include the Fonts
+include *.ttf
+
+# Include the license file
+include LICENSE.txt
+
+# Include the data files
+recursive-include data *
