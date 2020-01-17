@@ -4,6 +4,10 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+twine = "*"
+flake8 = "*"
+pylint = "*"
+black = "==19.10b0"
 
 [packages]
 pillow = "*"

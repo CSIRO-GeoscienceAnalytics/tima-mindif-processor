@@ -1,6 +1,5 @@
-#!/usr/bin/python
-
-# The purpose of this script is to process a provided MinDIF dataset, and during the process carry out these actions:
+# The purpose of this script is to process a provided MinDIF dataset, and during the
+# process carry out these actions:
 #   1. Create a classification image in full resolution with a legend.
 #
 # The script should be executed in the following manner:
@@ -15,51 +14,67 @@ import math
 import re
 import copy
 import xml.etree.ElementTree as ET
+from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
-from .utils import log_variable, log_message, get_percent_text
-
+from .utils import get_percent_text, create_thumbnail
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str):
+def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str, is_16: bool = True):
     project_name = os.path.split(project_path)[1]
 
-    print("Project Name: {}".format(project_name))
+    logger.info("Project Name: {}", project_name)
+    guid_and_sample_name = []
 
-    surveys_xml_path = os.path.join(
-        project_path, project_name + ".timaproj.Surveys", "Surveys.xml"
-    )
-    surveys_xml = ET.parse(surveys_xml_path)
-    survey_group = surveys_xml.getroot()
+    if is_16:
+        data_xml_path = os.path.join(project_path, project_name + ".timaproj.data")
+        data_xml = ET.parse(data_xml_path)
+        project_data = data_xml.getroot()
 
-    # Get the names of the samples and the GUID that they're mapped to:
-    guid_and_sample_name = {}
-    for survey in survey_group.iterfind("Survey"):
-        for replicate in survey.iterfind("Replicate"):
-            for dataset in replicate.iterfind("Dataset"):
-                guid_and_sample_name[dataset.get("guid")[1:37]] = replicate.get(
-                    "caption"
-                )
+        rep_to_dir = {}
+        for dataset in project_data.iterfind("DataSet"):
+            rep_to_dir[dataset.findtext("Parent")] = dataset.findtext("DirName")
 
-    for guid, sample_name in guid_and_sample_name.iteritems():
-        log_variable("Sample Name", sample_name)
+        struct_xml_path = os.path.join(project_path, project_name + ".timaproj.struct")
+        struct_xml = ET.parse(struct_xml_path)
+        struct_data = struct_xml.getroot()
+
+        # Get the names of the samples and the GUID that they're mapped to:
+        survey_group = struct_data.find("SurveyGroup")
+        if survey_group is not None:
+            for survey in survey_group.iterfind("Survey"):
+                for replicate in survey.iterfind("Replicate"):
+                    guid_and_sample_name.append(
+                        (rep_to_dir[replicate.get("guid")], replicate.get("caption"))
+                    )
+        else:
+            logger.error("SurveryGroup element could not be found in {}", struct_xml_path)
+    else:
+        surveys_xml_path = os.path.join(
+            project_path, project_name + ".timaproj.Surveys", "Surveys.xml"
+        )
+        surveys_xml = ET.parse(surveys_xml_path)
+        survey_group = surveys_xml.getroot()
+        for survey in survey_group.iterfind("Survey"):
+            for replicate in survey.iterfind("Replicate"):
+                for dataset in replicate.iterfind("Dataset"):
+                    guid_and_sample_name.append((dataset.get("guid")[1:37], replicate.get("caption")))
+
+    namespace = "http://www.tescan.cz/tima/1_4"
+    xml_namespace = "{{{0}}}".format(namespace) if namespace else ""
+
+    for guid, sample_name in guid_and_sample_name:
+        logger.debug("Sample Name: {}", sample_name)
         thumbnail_path = os.path.join(output_root, sample_name + ".thumbnail.png")
         classification_path = os.path.join(output_root, sample_name + ".png")
 
         if os.path.exists(classification_path):
-            print(
-                "NOTICE: skipping " + guid + " because an image already exists for it."
-            )
+            logger.info("skipping {} because an image already exists for it.", guid)
             continue
 
         mindif_path = os.path.join(mindif_root, guid)
 
-        # Constants / Readonly:
-        namespace = "http://www.tescan.cz/tima/1_4"  # TODO: make namespace dynamic
-        xml_namespace = "{{{0}}}".format(namespace) if namespace else ""
-
-        namespaces = {"tescan": namespace}
         white = (255, 255, 255)
         black = (0, 0, 0)
 
@@ -72,9 +87,9 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         legend_line_height = int(math.ceil(font_size * 1.3))
         legend_text_x_offset = legend_line_height * 2 - font_size
 
-        log_variable("Font Size", font_size)
-        log_variable("Legend Line Height", legend_line_height)
-        log_variable("Legend text X Offset", legend_text_x_offset)
+        logger.debug("Font Size: {}", font_size)
+        logger.debug("Legend Line Height: {}", legend_line_height)
+        logger.debug("Legend text X Offset: {}", legend_text_x_offset)
 
         # Extract the phases from phases.xml and use it to create the colour map:
         xml_path = ""
@@ -88,10 +103,9 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
                 break
 
         if not xml_path:
-            print(
-                "WARNING: phases.xml was not found in "
-                + mindif_path
-                + " or the directory does not exist."
+            logger.warning(
+                "phases.xml was not found in {} or the directory does not exist.",
+                mindif_path,
             )
             continue
 
@@ -103,14 +117,12 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         largest_name_width = 0
         phase_map = {}
 
-        log_message("Extracting phases from {0}".format(phases_xml_path))
+        logger.debug("Extracting phases from {}", phases_xml_path)
         for phase_node in phase_nodes:
             mineral_name = phase_node.get("name")
 
-            if (
-                phase_node.get("background") == "yes"
-                or mineral_name == "[Unclassified]"
-            ):
+            # if phase_node.get('background') == 'yes' or mineral_name == '[Unclassified]':
+            if mineral_name == "[Unclassified]" or phase_node.get("background") == "yes":
                 continue
 
             phase_id = int(phase_node.get("id"))
@@ -153,18 +165,18 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         image_height_px = int(
             measurement_nodes.findtext("{0}ImageHeight".format(xml_namespace))
         )
-        sample_shape = measurement_nodes.find("tescan:SampleDef", namespaces).findtext(
+        sample_shape = measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
             "{0}SampleShape".format(xml_namespace)
         )
 
         if sample_shape == "Rectangle":
             sample_width_um = int(
-                measurement_nodes.find("tescan:SampleDef", namespaces).findtext(
+                measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
                     "{0}SampleWidth".format(xml_namespace)
                 )
             )
             sample_height_um = int(
-                measurement_nodes.find("tescan:SampleDef", namespaces).findtext(
+                measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
                     "{0}SampleHeight".format(xml_namespace)
                 )
             )
@@ -179,16 +191,16 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         else:
             # Must be a circle
             sample_diameter_um = int(
-                measurement_nodes.find("tescan:SampleDef", namespaces).findtext(
-                    "{0}SampleDiameter".format(xml_namespace)
-                )
+                measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
+                    "{0}SampleDiameter".format(xml_namespace))
             )
             diameter_px = int(
                 (sample_diameter_um / float(view_field_um)) * image_width_px
             )
             field_size = (diameter_px, diameter_px)
 
-        # To right-align the numeric values we use "< 0.01" as the longest string then work out the offset from that.
+        # To right-align the numeric values we use "< 0.01" as the longest string then work out the offset 
+        # from that.
         max_numeric_width = font.getsize("<0.01")[0]
         legend_start_x = int(math.ceil(field_size[0] + 30))
 
@@ -202,7 +214,7 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
             - font_size
         )
         canvas_size = (percent_right_x, field_size[1])
-        outline_thickness = math.ceil(field_size[0] / 1000)
+        # outline_thickness = math.ceil(field_size[0] / 1000)
         origin = (field_size[0] / 2, field_size[1] / 2)
         pixel_spacing = float(view_field_um) / float(image_width_px)
 
@@ -210,8 +222,8 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         fields_xml_path = os.path.join(xml_path, "fields.xml")
         fields_xml = ET.parse(fields_xml_path)
         fields_xml_root = fields_xml.getroot()
-        field_nodes = fields_xml_root.find("tescan:Fields", namespaces)
-        field_dir = fields_xml_root.find("tescan:FieldDir", namespaces).text
+        field_nodes = fields_xml_root.find("{}Fields".format(xml_namespace))
+        field_dir = fields_xml_root.findtext("{}FieldDir".format(xml_namespace))
 
         fields = []
         if field_nodes is not None:
@@ -219,8 +231,10 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
                 field_name = field_node.get("name")
 
                 # The x and y values are the offset from the origin.
-                # TIMA uses +x to mean left, which is opposite to monitor coordinate system, so this value gets inverted.
-                # and       +y to mean down, which is the same as monitor coordinate system, so this value doesn't get inverted.
+                # TIMA uses +x to mean left, which is opposite to monitor coordinate system, 
+                # so this value gets inverted.
+                # and       +y to mean down, which is the same as monitor coordinate system, 
+                # so this value doesn't get inverted.
                 x = round(
                     -float(field_node.get("x")) / pixel_spacing
                     + origin[0]
@@ -234,12 +248,10 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
 
                 fields.append((field_name, x, y))
         else:
-            print(
-                "WARNING: "
-                + guid
-                + ", "
-                + sample_name
-                + " does not have any tescan:Fields in the fields.xml file"
+            logger.warning(
+                "{}, {}  does not have any Fields in the fields.xml file",
+                guid,
+                sample_name,
             )
 
         # Prepare new canvas:
@@ -261,29 +273,23 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
 
             try:
                 phases = Image.open(field_path_format.format(field_name, "phases.tif"))
-            except:
-                print(
-                    "Error: "
-                    + guid
-                    + ", "
-                    + sample_name
-                    + ", field "
-                    + field_name
-                    + " does not have phases.tif"
+            except Exception:
+                logger.error(
+                    "Error: {}, {}, field {} does not have phases.tif",
+                    guid,
+                    sample_name,
+                    field_name,
                 )
                 has_missing_file = True
 
             try:
                 mask = Image.open(field_path_format.format(field_name, "mask.png"))
-            except:
-                print(
-                    "Error: "
-                    + guid
-                    + ", "
-                    + sample_name
-                    + ", field "
-                    + field_name
-                    + " does not have mask.png"
+            except Exception:
+                logger.error(
+                    "Error: {}, {}, field {} does not have mask.png",
+                    guid,
+                    sample_name,
+                    field_name,
                 )
                 has_missing_file = True
 
@@ -314,17 +320,15 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
                             classified_pixel_count += 1
                             phase_map[phase_index]["histogram"] += 1
                             field_phase_map[phase_index]["histogram"] += 1
-                    except IndexError as exc:
-                        print(
-                            "Index out of bounds in phase/mask loop x: {} y: {}".format(
-                                x, y
-                            )
+                    except IndexError:
+                        logger.error(
+                            "Index out of bounds in phase/mask loop x: {} y: {}", x, y
                         )
                         break
 
             # Once all the pixels have been dealt with we can create the insert commands for this field:
             field_phase_map = {
-                k: v for k, v in field_phase_map.iteritems() if v["histogram"] != 0
+                k: v for k, v in field_phase_map.items() if v["histogram"] != 0
             }
 
             # TODO: this is a waste, all I really want to do is change from dict to list
@@ -333,11 +337,11 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
             )
 
         if has_missing_file:
-            print("Error: not processing " + guid + " due to missing files.")
+            logger.error("Error: not processing {} due to missing files.", guid)
             continue
 
         # Remove phase_map entries where histogram == 0
-        phase_map = {k: v for k, v in phase_map.iteritems() if v["histogram"] != 0}
+        phase_map = {k: v for k, v in phase_map.items() if v["histogram"] != 0}
 
         # Sort phase_map entries by histogram highest to lowest
         phase_map = sorted(

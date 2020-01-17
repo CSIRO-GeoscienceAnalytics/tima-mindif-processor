@@ -4,7 +4,7 @@ from loguru import logger
 from . import utils
 
 # from .tima_mindif_processor import tima_mindif_processor as tima14
-from .tima_mindif_processor_16 import tima_mindif_processor as tima16
+from .tima_mindif_processor import tima_mindif_processor
 
 
 @logger.catch
@@ -21,28 +21,20 @@ def main():
         help="Path to the desired output folder",
     )
     parser.add_argument(
-        "--tima_version",
+        "--tima-version",
         "-t",
         dest="tima_version",
-        choices=["1.4", "1.6"],
+        choices=["1.4", "1.5", "1.6"],
         default="1.6",
         type=str,
         help="Version of TIMA default 1.6",
     )
     parser.add_argument(
         "--verbose",
-        dest="verbose",
-        default=True,
-        type=bool,
+        action="store_true",
         help="Prints more information about app progress.",
     )
-    parser.add_argument(
-        "--thumbs",
-        dest="thumbnails",
-        default=False,
-        type=bool,
-        help="Create thumbnails.",
-    )
+    parser.add_argument("--thumbs", action="store_true", help="Create thumbnails.")
     args = parser.parse_args()
 
     logger_config = {
@@ -51,18 +43,20 @@ def main():
                 "sink": sys.stdout,
                 "level": "INFO" if not args.verbose else "DEBUG",
                 "format": "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-                "<level>{message}</level>"
+                "<level>{message}</level>",
             }
         ]
     }
     logger.configure(**logger_config)
 
-    utils.create_thumbnail = args.thumbnails
+    utils.create_thumbnail = True if args.thumbs else False
 
-    if args.tima_version == "1.6":
-        tima16(args.project_path, args.mindif_root, args.output)
-    # else:
-    #     tima14(args.project_path, args.mindif_root, args.output)
+    tima_mindif_processor(
+        args.project_path,
+        args.mindif_root,
+        args.output,
+        is_16=(args.tima_version == "1.6"),
+    )
 
 
 if __name__ == "__main__":
