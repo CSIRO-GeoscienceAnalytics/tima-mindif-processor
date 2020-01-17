@@ -1,5 +1,6 @@
 import argparse
 import sys
+import os
 from loguru import logger
 from . import utils
 
@@ -21,41 +22,51 @@ def main():
         help="Path to the desired output folder",
     )
     parser.add_argument(
-        "--tima-version",
-        "-t",
-        dest="tima_version",
-        choices=["1.4", "1.5", "1.6"],
-        default="1.6",
-        type=str,
-        help="Version of TIMA default 1.6",
-    )
-    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Prints more information about app progress.",
     )
+    parser.add_argument(
+        "--exclude-unclassified",
+        "-u",
+        action="store_true",
+        help="Exclude unclassified rock types from image",
+    )
+    parser.add_argument(
+        "--show-low-val",
+        "-l",
+        action="store_true",
+        help="Prints rock types with <0.01 in the legend.",
+    )
     parser.add_argument("--thumbs", action="store_true", help="Create thumbnails.")
     args = parser.parse_args()
-
-    logger_config = {
-        "handlers": [
-            {
-                "sink": sys.stdout,
-                "level": "INFO" if not args.verbose else "DEBUG",
-                "format": "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-                "<level>{message}</level>",
-            }
-        ]
-    }
-    logger.configure(**logger_config)
+    logger.remove()
+    logger.add(
+        sys.stdout,
+        enqueue=True,
+        level="INFO" if not args.verbose else "DEBUG",
+        format="<green>{time:HH:mm:ss}</green> | <cyan>{process}</cyan> | <level>{message}</level>",
+    )
 
     utils.create_thumbnail = True if args.thumbs else False
+
+    if not os.path.exists(args.project_path):
+        logger.error("Could not find: {}", args.project_path)
+        return
+
+    if not os.path.exists(args.mindif_root):
+        logger.error("Could not find: {}", args.mindif_root)
+        return
+
+    exclude_unclassified: bool = True if args.exclude_unclassified else False
+    show_low_val: bool = True if args.show_low_val else False
 
     tima_mindif_processor(
         args.project_path,
         args.mindif_root,
         args.output,
-        is_16=(args.tima_version == "1.6"),
+        exclude_unclassified,
+        show_low_val,
     )
 
 

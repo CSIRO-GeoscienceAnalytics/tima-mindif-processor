@@ -1,14 +1,23 @@
 from setuptools import setup
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
-    name="tima-mindef",
-    description="TIMA Min Def Processor",
-    version="1.0",
+    name="tima-mindif",
+    description="TIMA Min Dif Processor",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    version="1.1.1",
     packages=["tima"],
-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4",
-    entry_points={"console_scripts": ["tima-mindef=tima.__main__:main"]},
+    maintainer="Samuel Bradley",
+    maintainer_email="sam.bradley@csiro.au",
+    python_requires=">=2.7, <4",
+    entry_points={"console_scripts": ["tima-mindif=tima.__main__:main"]},
     install_requires=["pillow", "loguru"],
+    include_package_data=True,
     license="MIT",
+    url="https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor",
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -16,8 +25,7 @@ setup(
         #   5 - Production/Stable
         "Development Status :: 4 - Beta",
         # Indicate who your project is intended for
-        "Intended Audience :: Researchers",
-        "Topic :: Geology :: Lab Software",
+        "Intended Audience :: Science/Research",
         # Pick your license as you wish (should match "license" above)
         "License :: OSI Approved :: MIT License",
         # Specify the Python versions you support here. In particular, ensure

@@ -8,7 +8,7 @@ install from pypi
 pip install tima-mindef
 ```
 
-Install direct from git
+Install direct from git (Note: this is currently a private repository)
 
 ```
 pip install git+https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor.git
@@ -37,6 +37,10 @@ Once it's installed use the command 'tima-mindef'
 ```
 tima-mindef -h
 
+usage: tima-mindef [-h] [--output OUTPUT] [--tima-version {1.4,1.5,1.6}]
+                   [--verbose] [--thumbs]
+                   project_path mindif_root
+
 Process TIMA data
 
 positional arguments:
@@ -47,10 +51,10 @@ optional arguments:
   -h, --help            show this help message and exit
   --output OUTPUT, -o OUTPUT
                         Path to the desired output folder
-  --tima_version {1.4,1.6}, -t {1.4,1.6}
+  --tima-version {1.4,1.5,1.6}, -t {1.4,1.5,1.6}
                         Version of TIMA default 1.6
-  --verbose VERBOSE     Prints more information about app progress.
-  --thumbs THUMBNAILS   Create thumbnails.
+  --verbose             Prints more information about app progress.
+  --thumbs              Create thumbnails.
 
 ```
 

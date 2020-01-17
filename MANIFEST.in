@@ -2,10 +2,7 @@
 include *.md
 
 # Include the Fonts
-include *.ttf
+include tima/fonts/*.ttf
 
 # Include the license file
 include LICENSE.txt
-
-# Include the data files
-recursive-include data *
