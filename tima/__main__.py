@@ -38,6 +38,12 @@ def main():
         action="store_true",
         help="Prints rock types with <0.01 in the legend.",
     )
+    parser.add_argument(
+        "--id-arrays",
+        "-i",
+        action="store_true",
+        help="Generate Rock Type ID Arrays for each sample.",
+    )
     parser.add_argument("--thumbs", action="store_true", help="Create thumbnails.")
     args = parser.parse_args()
     logger.remove()
@@ -60,6 +66,15 @@ def main():
 
     exclude_unclassified: bool = True if args.exclude_unclassified else False
     show_low_val: bool = True if args.show_low_val else False
+    id_arrays: bool = True if args.id_arrays else False
+
+    logger.debug("Starting Tima MinDif Processor with the following settings")
+    logger.debug("Project Path: {}", args.project_path)
+    logger.debug("MinDif Path: {}", args.mindif_root)
+    logger.debug("Output Directory: {}", args.output)
+    logger.debug("Exclude Unclassified: {}", exclude_unclassified)
+    logger.debug("Show Low Values in Legend: {}", show_low_val)
+    logger.debug("Generate Rock Type ID Arrays: {}", id_arrays)
 
     tima_mindif_processor(
         args.project_path,
@@ -67,6 +82,7 @@ def main():
         args.output,
         exclude_unclassified,
         show_low_val,
+        id_arrays,
     )
 
 

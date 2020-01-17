@@ -14,3 +14,4 @@ gitchangelog = "*"
 pillow = "*"
 tima-mindef = {editable = true,path = "."}
 loguru = "*"
+numpy = "*"

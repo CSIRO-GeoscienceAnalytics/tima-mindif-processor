@@ -8,7 +8,7 @@ setup(
     description="TIMA Min Dif Processor",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version="1.1.1",
+    version="1.2.0",
     packages=["tima"],
     maintainer="Samuel Bradley",
     maintainer_email="sam.bradley@csiro.au",
@@ -30,8 +30,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",

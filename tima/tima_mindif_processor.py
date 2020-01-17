@@ -14,6 +14,7 @@ import math
 import re
 import copy
 import multiprocessing
+import numpy as np
 from functools import partial
 import xml.etree.ElementTree as ET
 from loguru import logger
@@ -40,6 +41,7 @@ def tima_mindif_processor(
     output_root: str,
     exclude_unclassified: bool = True,
     show_low_val: bool = True,
+    generate_id_array: bool = True
 ):
     project_name = os.path.split(project_path)[1]
 
@@ -85,12 +87,12 @@ def tima_mindif_processor(
                     guid_and_sample_name.append(
                         (dataset.get("guid")[1:37], replicate.get("caption"))
                     )
-    func = partial(create_sample, mindif_root, output_root, exclude_unclassified, show_low_val)
+    func = partial(create_sample, mindif_root, output_root, exclude_unclassified, show_low_val, generate_id_array)
     with multiprocessing.Pool(initializer=set_global, initargs=(logger, )) as pool:
         pool.map(func, guid_and_sample_name)
 
 
-def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool, show_low_val: bool, guid_and_sample_name):
+def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool, show_low_val: bool, generate_id_array: bool, guid_and_sample_name):
     guid = guid_and_sample_name[0]
     sample_name = guid_and_sample_name[1]
     
@@ -99,8 +101,14 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     classification_path = os.path.join(output_root, sample_name + ".png")
 
     if os.path.exists(classification_path):
-        logger.info("skipping {} because an image already exists for it.", guid)
+        logger.info("skipping {} because an image already exists for it.", sample_name)
         return
+    
+    if generate_id_array:
+        id_array_path = os.path.join(output_root, sample_name + ".csv.gz")
+        if os.path.exists(id_array_path):
+            logger.info("Not generating id_array for sample {} because a csv already exists for it.", sample_name)
+            generate_id_array = False
 
     mindif_path = os.path.join(mindif_root, guid)
 
@@ -285,6 +293,8 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     # Prepare new canvas:
     png = Image.new("RGB", canvas_size, white)
     png_array = png.load()
+    if generate_id_array:    
+        phase_id_array = np.full(canvas_size, -1)
 
     classified_pixel_count = 0
 
@@ -339,6 +349,9 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
                         png_array[x + field_x, y + field_y] = phase_map[
                             phase_index
                         ]["colour"]
+                        
+                        if generate_id_array:
+                            phase_id_array[x + field_x, y + field_y] = phase_index
 
                         thumbnail_x_min = min(thumbnail_x_min, png_x)
                         thumbnail_x_max = max(thumbnail_x_max, png_x)
@@ -429,5 +442,10 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     # draw.arc([0, 0, field_size[0], field_size[1]], 0, 360, black)
     png.save(classification_path)
     logger.debug("Sample: {} imaged saved to {}", sample_name, classification_path)
+
+    if generate_id_array:
+        np.savetxt(id_array_path, phase_id_array, fmt='%d', delimiter=',', newline='\n', header='', footer='', encoding=None)
+        logger.debug("Sample: {} id array saved to {}", sample_name, id_array_path)
+
     del draw
     del png
