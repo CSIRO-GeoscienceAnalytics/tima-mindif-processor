@@ -45,12 +45,17 @@ def main():
     )
     args = parser.parse_args()
 
-    logger.add(
-        sys.stdout,
-        colorize=True,
-        format="<green>{time}</green> <level>{message}</level>",
-        level="INFO" if not args.verbose else "DEBUG",
-    )
+    logger_config = {
+        "handlers": [
+            {
+                "sink": sys.stdout,
+                "level": "INFO" if not args.verbose else "DEBUG",
+                "format": "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+                "<level>{message}</level>"
+            }
+        ]
+    }
+    logger.configure(**logger_config)
 
     utils.create_thumbnail = args.thumbnails
 

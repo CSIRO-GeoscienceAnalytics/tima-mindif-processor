@@ -31,12 +31,16 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
     data_xml = ET.parse(data_xml_path)
     project_data = data_xml.getroot()
 
+
     # Get the names of the samples and the GUID that they're mapped to:
     guid_and_sample_name = []
     for dataset in project_data.iterfind("DataSet"):
         guid_and_sample_name.append(
             (dataset.find("GUID").text[1:37], dataset.find("JobName").text)
         )
+
+    namespace = "http://www.tescan.cz/tima/1_4"  # TODO: make namespace dynamic
+    xml_namespace = "{{{0}}}".format(namespace) if namespace else ""
 
     for guid, sample_name in guid_and_sample_name:
         logger.debug("Sample Name: {}", sample_name)
@@ -85,12 +89,14 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
 
         phases_xml_path = os.path.join(xml_path, "phases.xml")
         phases_xml = ET.parse(phases_xml_path)
-        phase_nodes = phases_xml.getroot().find("PrimaryPhases")
+        phase_nodes = phases_xml.getroot().find(
+            "{0}PrimaryPhases".format(xml_namespace)
+        )
         largest_name_width = 0
         phase_map = {}
 
         logger.debug("Extracting phases from {}", phases_xml_path)
-        for phase_node in phase_nodes.iterfind("PrimaryPhase"):
+        for phase_node in phase_nodes:
             mineral_name = phase_node.get("name")
 
             # if phase_node.get('background') == 'yes' or mineral_name == '[Unclassified]':
@@ -101,8 +107,8 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
 
             largest_name_width = max(largest_name_width, font.getsize(mineral_name)[0])
 
-            colour_str = phase_node.find("color").text
-            mass = float(phase_node.find("mass").text)
+            colour_str = phase_node.get("color")
+            mass = float(phase_node.get("mass"))
 
             phase_map[phase_id] = {
                 "mineral_name": mineral_name,
@@ -119,25 +125,38 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         empty_phase_map = copy.deepcopy(phase_map)
 
         # Extract information from measurement.xml and create the mindif record:
-        measurement_xml_path = os.path.join(mindif_path, "measurement.xml")
+        measurement_xml_path = os.path.join(xml_path, "measurement.xml")
         measurement_xml = ET.parse(measurement_xml_path)
         measurement_nodes = measurement_xml.getroot()
 
-        measurement_guid = measurement_nodes.findtext("Id")
+        measurement_guid = measurement_nodes.findtext("{0}Id".format(xml_namespace))
         measurement_guid = re.sub("[^[a-f0-9]", "", measurement_guid)
 
-        software_version = measurement_nodes.findtext("Origin")
-        view_field_um = int(measurement_nodes.findtext("ViewField"))
-        image_width_px = int(measurement_nodes.findtext("ImageWidth"))
-        image_height_px = int(measurement_nodes.findtext("ImageHeight"))
-        sample_shape = measurement_nodes.find("SampleDef").findtext("SampleShape")
+        software_version = measurement_nodes.findtext("{0}Origin".format(xml_namespace))
+
+        view_field_um = int(
+            measurement_nodes.findtext("{0}ViewField".format(xml_namespace))
+        )
+        image_width_px = int(
+            measurement_nodes.findtext("{0}ImageWidth".format(xml_namespace))
+        )
+        image_height_px = int(
+            measurement_nodes.findtext("{0}ImageHeight".format(xml_namespace))
+        )
+        sample_shape = measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
+            "{0}SampleShape".format(xml_namespace)
+        )
 
         if sample_shape == "Rectangle":
             sample_width_um = int(
-                measurement_nodes.find("SampleDef").findtext("SampleWidth")
+                measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
+                    "{0}SampleWidth".format(xml_namespace)
+                )
             )
             sample_height_um = int(
-                measurement_nodes.find("SampleDef").findtext("SampleHeight")
+                measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
+                    "{0}SampleHeight".format(xml_namespace)
+                )
             )
             sample_width_px = int(
                 (sample_width_um / float(view_field_um)) * image_width_px
@@ -150,7 +169,7 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         else:
             # Must be a circle
             sample_diameter_um = int(
-                measurement_nodes.find("SampleDef").findtext("SampleDiameter")
+                measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext("{0}SampleDiameter".format(xml_namespace))
             )
             diameter_px = int(
                 (sample_diameter_um / float(view_field_um)) * image_width_px
@@ -179,8 +198,8 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
         fields_xml_path = os.path.join(xml_path, "fields.xml")
         fields_xml = ET.parse(fields_xml_path)
         fields_xml_root = fields_xml.getroot()
-        field_nodes = fields_xml_root.find("Fields")
-        field_dir = fields_xml_root.findtext("FieldDir")
+        field_nodes = fields_xml_root.find("{}Fields".format(xml_namespace))
+        field_dir = fields_xml_root.findtext("{}FieldDir".format(xml_namespace))
 
         fields = []
         if field_nodes is not None:
@@ -215,7 +234,7 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
 
         classified_pixel_count = 0
 
-        field_path_format = os.path.join(xml_path, field_dir, "", "{1}")
+        field_path_format = os.path.join(xml_path, field_dir, "{0}", "{1}")
 
         thumbnail_x_min = 1000000000
         thumbnail_x_max = -1
@@ -283,7 +302,7 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
 
             # Once all the pixels have been dealt with we can create the insert commands for this field:
             field_phase_map = {
-                k: v for k, v in field_phase_map.iteritems() if v["histogram"] != 0
+                k: v for k, v in field_phase_map.items() if v["histogram"] != 0
             }
 
             # TODO: this is a waste, all I really want to do is change from dict to list
@@ -296,7 +315,7 @@ def tima_mindif_processor(project_path: str, mindif_root: str, output_root: str)
             continue
 
         # Remove phase_map entries where histogram == 0
-        phase_map = {k: v for k, v in phase_map.iteritems() if v["histogram"] != 0}
+        phase_map = {k: v for k, v in phase_map.items() if v["histogram"] != 0}
 
         # Sort phase_map entries by histogram highest to lowest
         phase_map = sorted(

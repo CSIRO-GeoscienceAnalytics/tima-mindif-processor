@@ -9,6 +9,3 @@ verify_ssl = true
 pillow = "*"
 tima-mindef = {editable = true,path = "."}
 loguru = "*"
-
-[requires]
-python_version = "3.8"

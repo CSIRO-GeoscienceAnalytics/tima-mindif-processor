@@ -1,12 +1,10 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6e283561d910ad5c375e85372286186ffe0ff33d1c494d0f2713b7a694397e66"
+            "sha256": "962df2ad925ecc6a25a1bb341c02781134609182933f82f6760a00aa2678e0b0"
         },
         "pipfile-spec": 6,
-        "requires": {
-            "python_version": "3.8"
-        },
+        "requires": {},
         "sources": [
             {
                 "name": "pypi",
@@ -16,6 +14,14 @@
         ]
     },
     "default": {
+        "colorama": {
+            "hashes": [
+                "sha256:7d73d2a99753107a36ac6b455ee49046802e59d9d076ef8e47b61499fa29afff",
+                "sha256:e96da0d330793e2cb9485e9ddfd918d456036c7149416295932478192f4436a1"
+            ],
+            "markers": "sys_platform == 'win32'",
+            "version": "==0.4.3"
+        },
         "loguru": {
             "hashes": [
                 "sha256:6e3e8d865201f5a301a4eb7563f4c9e979d80fbe6f6fa919b3e3a7e095106c7b",
@@ -55,6 +61,14 @@
         "tima-mindef": {
             "editable": true,
             "path": "."
+        },
+        "win32-setctime": {
+            "hashes": [
+                "sha256:568fd636c68350bcc54755213fe01966fe0a6c90b386c0776425944a0382abef",
+                "sha256:b47e5023ec7f0b4962950902b15bc56464a380d869f59d27dbf9ab423b23e8f9"
+            ],
+            "markers": "sys_platform == 'win32'",
+            "version": "==1.0.1"
         }
     },
     "develop": {}
