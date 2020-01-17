@@ -37,8 +37,8 @@ Once it's installed use the command 'tima-mindef'
 ```
 tima-mindef -h
 
-usage: tima-mindef [-h] [--output OUTPUT] [--tima-version {1.4,1.5,1.6}]
-                   [--verbose] [--thumbs]
+usage: tima-mindif [-h] [--output OUTPUT] [--verbose] [--exclude-unclassified]
+                   [--show-low-val] [--thumbs]
                    project_path mindif_root
 
 Process TIMA data
@@ -51,9 +51,10 @@ optional arguments:
   -h, --help            show this help message and exit
   --output OUTPUT, -o OUTPUT
                         Path to the desired output folder
-  --tima-version {1.4,1.5,1.6}, -t {1.4,1.5,1.6}
-                        Version of TIMA default 1.6
   --verbose             Prints more information about app progress.
+  --exclude-unclassified, -u
+                        Exclude unclassified rock types from image
+  --show-low-val, -l    Prints rock types with <0.01 in the legend.
   --thumbs              Create thumbnails.
 
 ```

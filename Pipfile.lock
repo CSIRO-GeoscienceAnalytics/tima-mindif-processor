@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "656fa60a0e6145191d1f125c08efb1f50540759f0de5b69d2b00155a5e833c94"
+            "sha256": "c2efeeb04d1be64d8ba3607c5024db44d3c71c627107dbad871040274a617e2f"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -158,6 +158,14 @@
             ],
             "index": "pypi",
             "version": "==3.7.9"
+        },
+        "gitchangelog": {
+            "hashes": [
+                "sha256:3d8d6a730450fbd5b0a9bc58d0dd3e269c967d7eb4fece0c5cff4372a3f77421",
+                "sha256:45f8b8e64cece0d9bb03a35ecd8ee62c1c7157f8dac0ef3cb68381bfcc1bde29"
+            ],
+            "index": "pypi",
+            "version": "==3.0.4"
         },
         "idna": {
             "hashes": [
