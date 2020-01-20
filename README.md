@@ -2,6 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/tima-mindif.svg)](https://badge.fury.io/py/tima-mindif)
 [![pipeline status](https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor/badges/master/pipeline.svg)](https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor/commits/master)
+[![coverage report](https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor/badges/master/coverage.svg)](https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor/commits/master)
 
 ## Getting Started
 

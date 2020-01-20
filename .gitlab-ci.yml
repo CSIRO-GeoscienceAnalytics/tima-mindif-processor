@@ -19,7 +19,7 @@ stages:
   - Deploy
 
 variables:
-  REPO_AUTH: https://$GIT_AUTH@gitlab.com/csiro-geoanalytics/data-mosaic/data-mosaic-core.git
+  REPO_AUTH: https://$GIT_AUTH@gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor.git
 
 install-deps:
   stage: Build

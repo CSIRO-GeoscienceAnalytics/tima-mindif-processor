@@ -22,8 +22,9 @@ import xml.etree.ElementTree as ET
 from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
 
-script_path = os.path.dirname(os.path.realpath(__file__))
-xml_namespace = None
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+XML_NAMESPACE = None
+
 
 def get_percent_text(value):
     if value < 0.01:
@@ -32,13 +33,13 @@ def get_percent_text(value):
 
 
 def set_global(logger_):
-    global xml_namespace
+    global XML_NAMESPACE
     global logger
     logger = logger_
 
-    if not xml_namespace:
+    if not XML_NAMESPACE:
         namespace = "http://www.tescan.cz/tima/1_4"
-        xml_namespace = "{{{0}}}".format(namespace) if namespace else ""
+        XML_NAMESPACE = "{{{0}}}".format(namespace) if namespace else ""
 
 
 def tima_mindif_processor(
@@ -147,7 +148,7 @@ def create_sample(
     black = (0, 0, 0)
 
     font_size = 24
-    font_path = os.path.join(script_path, "fonts")
+    font_path = os.path.join(SCRIPT_PATH, "fonts")
     font = ImageFont.truetype(os.path.join(font_path, "DejaVuSansMono.ttf"), font_size)
 
     legend_line_height = int(math.ceil(font_size * 1.3))
@@ -173,7 +174,7 @@ def create_sample(
 
     phases_xml_path = os.path.join(xml_path, "phases.xml")
     phases_xml = ET.parse(phases_xml_path)
-    phase_nodes = phases_xml.getroot().find("{0}PrimaryPhases".format(xml_namespace))
+    phase_nodes = phases_xml.getroot().find("{0}PrimaryPhases".format(XML_NAMESPACE))
     largest_name_width = 0
     phase_map = {}
 
@@ -213,34 +214,34 @@ def create_sample(
     measurement_xml = ET.parse(measurement_xml_path)
     measurement_nodes = measurement_xml.getroot()
 
-    measurement_guid = measurement_nodes.findtext("{0}Id".format(xml_namespace))
+    measurement_guid = measurement_nodes.findtext("{0}Id".format(XML_NAMESPACE))
     measurement_guid = re.sub("[^[a-f0-9]", "", measurement_guid)
 
-    software_version = measurement_nodes.findtext("{0}Origin".format(xml_namespace))
+    software_version = measurement_nodes.findtext("{0}Origin".format(XML_NAMESPACE))
     logger.debug("Tima Software Version: {}", software_version)
 
     view_field_um = int(
-        measurement_nodes.findtext("{0}ViewField".format(xml_namespace))
+        measurement_nodes.findtext("{0}ViewField".format(XML_NAMESPACE))
     )
     image_width_px = int(
-        measurement_nodes.findtext("{0}ImageWidth".format(xml_namespace))
+        measurement_nodes.findtext("{0}ImageWidth".format(XML_NAMESPACE))
     )
     image_height_px = int(
-        measurement_nodes.findtext("{0}ImageHeight".format(xml_namespace))
+        measurement_nodes.findtext("{0}ImageHeight".format(XML_NAMESPACE))
     )
-    sample_shape = measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
-        "{0}SampleShape".format(xml_namespace)
+    sample_shape = measurement_nodes.find("{}SampleDef".format(XML_NAMESPACE)).findtext(
+        "{0}SampleShape".format(XML_NAMESPACE)
     )
 
     if sample_shape == "Rectangle":
         sample_width_um = int(
-            measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
-                "{0}SampleWidth".format(xml_namespace)
+            measurement_nodes.find("{}SampleDef".format(XML_NAMESPACE)).findtext(
+                "{0}SampleWidth".format(XML_NAMESPACE)
             )
         )
         sample_height_um = int(
-            measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
-                "{0}SampleHeight".format(xml_namespace)
+            measurement_nodes.find("{}SampleDef".format(XML_NAMESPACE)).findtext(
+                "{0}SampleHeight".format(XML_NAMESPACE)
             )
         )
         sample_width_px = int((sample_width_um / float(view_field_um)) * image_width_px)
@@ -252,8 +253,8 @@ def create_sample(
     else:
         # Must be a circle
         sample_diameter_um = int(
-            measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
-                "{0}SampleDiameter".format(xml_namespace)
+            measurement_nodes.find("{}SampleDef".format(XML_NAMESPACE)).findtext(
+                "{0}SampleDiameter".format(XML_NAMESPACE)
             )
         )
         diameter_px = int((sample_diameter_um / float(view_field_um)) * image_width_px)
@@ -282,8 +283,8 @@ def create_sample(
     fields_xml_path = os.path.join(xml_path, "fields.xml")
     fields_xml = ET.parse(fields_xml_path)
     fields_xml_root = fields_xml.getroot()
-    field_nodes = fields_xml_root.find("{}Fields".format(xml_namespace))
-    field_dir = fields_xml_root.findtext("{}FieldDir".format(xml_namespace))
+    field_nodes = fields_xml_root.find("{}Fields".format(XML_NAMESPACE))
+    field_dir = fields_xml_root.findtext("{}FieldDir".format(XML_NAMESPACE))
 
     fields = []
     if field_nodes is not None:
@@ -398,7 +399,6 @@ def create_sample(
             k: v for k, v in field_phase_map.items() if v["histogram"] != 0
         }
 
-        # TODO: this is a waste, all I really want to do is change from dict to list
         field_phase_map = sorted(
             field_phase_map.items(), key=lambda x: x[1]["histogram"], reverse=True
         )
