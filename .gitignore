@@ -128,4 +128,3 @@ dmypy.json
 working/
 output/**
 local/
-test_output/
