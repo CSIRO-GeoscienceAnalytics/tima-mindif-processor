@@ -21,10 +21,14 @@ from functools import partial
 import xml.etree.ElementTree as ET
 from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
-from .utils import get_percent_text, create_thumbnail
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 xml_namespace = None
+
+def get_percent_text(value):
+    if value < 0.01:
+        return "<0.01"
+    return "{:4.2f}".format(value)
 
 
 def set_global(logger_):
@@ -42,6 +46,7 @@ def tima_mindif_processor(
     mindif_root: str,
     output_root: str,
     exclude_unclassified: bool = True,
+    create_thumbnail: bool = False,
     show_low_val: bool = True,
     generate_id_array: bool = True,
 ):
@@ -95,10 +100,15 @@ def tima_mindif_processor(
         output_root,
         exclude_unclassified,
         show_low_val,
+        create_thumbnail,
         generate_id_array,
     )
     with multiprocessing.Pool(initializer=set_global, initargs=(logger,)) as pool:
-        pool.map(func, guid_and_sample_name)
+        try:
+            pool.map(func, guid_and_sample_name)
+        finally:
+            pool.close()  # Marks the pool as closed.
+            pool.join()
 
 
 def create_sample(
@@ -106,6 +116,7 @@ def create_sample(
     output_root: str,
     exclude_unclassified: bool,
     show_low_val: bool,
+    create_thumbnail: bool,
     generate_id_array: bool,
     guid_and_sample_name,
 ):

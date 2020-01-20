@@ -10,6 +10,8 @@ pylint = "*"
 black = "==19.10b0"
 gitchangelog = "*"
 pytest = "*"
+pytest-cov = "*"
+coverage-badge = "*"
 
 [packages]
 pillow = "*"

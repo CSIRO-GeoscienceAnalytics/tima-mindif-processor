@@ -47,7 +47,8 @@ pylint:
 pytest:
   stage: Test
   script:
-    - pytest /tests
+    - pytest --cov=tima
+  coverage: "/TOTAL.+ ([0-9]{1,3}%)/"
 
 ########  ######## ##       ########    ###     ######  ########
 ##     ## ##       ##       ##         ## ##   ##    ## ##

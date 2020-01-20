@@ -3,7 +3,6 @@ import argparse
 import sys
 import os
 from loguru import logger
-from . import utils
 
 # from .tima_mindif_processor import tima_mindif_processor as tima14
 from .tima_mindif_processor import tima_mindif_processor
@@ -61,8 +60,6 @@ def main():
     )
     start = time.time()
 
-    utils.create_thumbnail = True if args.thumbs else False
-
     if not os.path.exists(args.project_path):
         logger.error("Could not find: {}", args.project_path)
         return
@@ -74,6 +71,7 @@ def main():
     exclude_unclassified: bool = True if args.exclude_unclassified else False
     show_low_val: bool = True if args.show_low_val else False
     id_arrays: bool = True if args.id_arrays else False
+    create_thumbnail: bool = True if args.thumbs else False
 
     logger.info("Starting Tima MinDif Processor with the following settings")
     logger.info("Project Path: {}", args.project_path)
@@ -86,10 +84,11 @@ def main():
     tima_mindif_processor(
         args.project_path,
         args.mindif_root,
-        args.output,
-        exclude_unclassified,
-        show_low_val,
-        id_arrays,
+        output_root=args.output,
+        exclude_unclassified=exclude_unclassified,
+        show_low_val=show_low_val,
+        create_thumbnail=create_thumbnail,
+        generate_id_array=id_arrays,
     )
 
     end = time.time()
