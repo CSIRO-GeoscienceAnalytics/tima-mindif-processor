@@ -1,0 +1,103 @@
+image: python:3.7-slim
+
+cache: &global_cache
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - /usr/local/lib/python3.7/site-packages
+  policy: pull
+
+before_script:
+  - pip install pipenv
+  - pipenv install --system --skip-lock --dev
+
+stages:
+  - Build
+  - Static Analysis
+  - Test
+  - Release
+  - Documentation
+  - Deploy
+
+variables:
+  REPO_AUTH: https://$GIT_AUTH@gitlab.com/csiro-geoanalytics/data-mosaic/data-mosaic-core.git
+
+install-deps:
+  stage: Build
+  cache:
+    <<: *global_cache
+    policy: pull-push
+  script:
+    - echo "Dependancies installed creating cache"
+
+flake8:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+    - flake8 --max-line-length=110 tima/*.py
+
+pylint:
+  stage: Static Analysis
+  allow_failure: true
+  cache:
+    <<: *global_cache
+    policy: pull
+  script:
+    - pylint --rcfile=setup.cfg tima
+
+pytest:
+  stage: Test
+  script:
+    - pytest /tests
+
+########  ######## ##       ########    ###     ######  ########
+##     ## ##       ##       ##         ## ##   ##    ## ##
+##     ## ##       ##       ##        ##   ##  ##       ##
+########  ######   ##       ######   ##     ##  ######  ######
+##   ##   ##       ##       ##       #########       ## ##
+##    ##  ##       ##       ##       ##     ## ##    ## ##
+##     ## ######## ######## ######## ##     ##  ######  ########
+
+.release:
+  stage: Release
+  dependencies:
+    - pytest
+  script:
+    - apt-get update && apt-get install -y --no-install-recommends git
+    - pip install bump2version
+    - git config --global user.email $GIT_EMAIL
+    - git config --global user.name "GitLab CI"
+    - git config remote.origin.url $REPO_AUTH
+    - git checkout master
+    - bump2version $RELEASE_TYPE
+    - git push origin --tags
+    - git commit --amend -m "[ci skip] New version"
+    - git push origin master
+  when: manual
+  only:
+    - master
+
+release-patch:
+  extends: .release
+  variables:
+    RELEASE_TYPE: patch
+
+release-minor:
+  extends: .release
+  variables:
+    RELEASE_TYPE: minor
+
+release-major:
+  extends: .release
+  variables:
+    RELEASE_TYPE: major
+
+deploy-to-nexus:
+  stage: Deploy
+  script:
+    - pip install twine
+    - echo "$NEXUS_CONFIG" > "/root/.pypirc"
+    - python setup.py sdist bdist_wheel
+    - twine upload --repository nexus dist/*.whl
+    - twine upload --repository pypi dist/*
+  only:
+    - tags

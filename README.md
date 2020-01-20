@@ -1,4 +1,6 @@
-# TIMA Mindif Processor
+# TIMA Mindif Processor v1.3.0
+
+[![PyPI version](https://badge.fury.io/py/tima-mindif.svg)](https://badge.fury.io/py/tima-mindif)
 
 ## Getting Started
 

@@ -1,3 +1,4 @@
+import time
 import argparse
 import sys
 import os
@@ -8,8 +9,7 @@ from . import utils
 from .tima_mindif_processor import tima_mindif_processor
 
 
-@logger.catch
-def main():
+def parse_args(args):
     parser = argparse.ArgumentParser(description="Process TIMA data")
     parser.add_argument("project_path", type=str, help="Path to the TIMA project")
     parser.add_argument("mindif_root", type=str, help="Path to the MinDif root")
@@ -45,14 +45,21 @@ def main():
         help="Generate Rock Type ID Arrays for each sample.",
     )
     parser.add_argument("--thumbs", action="store_true", help="Create thumbnails.")
-    args = parser.parse_args()
+    return parser.parse_args(args)
+
+
+@logger.catch
+def main():
+    args = parse_args(sys.argv[1:])
     logger.remove()
+
     logger.add(
         sys.stdout,
         enqueue=True,
         level="INFO" if not args.verbose else "DEBUG",
         format="<green>{time:HH:mm:ss}</green> | <cyan>{process}</cyan> | <level>{message}</level>",
     )
+    start = time.time()
 
     utils.create_thumbnail = True if args.thumbs else False
 
@@ -68,13 +75,13 @@ def main():
     show_low_val: bool = True if args.show_low_val else False
     id_arrays: bool = True if args.id_arrays else False
 
-    logger.debug("Starting Tima MinDif Processor with the following settings")
-    logger.debug("Project Path: {}", args.project_path)
-    logger.debug("MinDif Path: {}", args.mindif_root)
-    logger.debug("Output Directory: {}", args.output)
-    logger.debug("Exclude Unclassified: {}", exclude_unclassified)
-    logger.debug("Show Low Values in Legend: {}", show_low_val)
-    logger.debug("Generate Rock Type ID Arrays: {}", id_arrays)
+    logger.info("Starting Tima MinDif Processor with the following settings")
+    logger.info("Project Path: {}", args.project_path)
+    logger.info("MinDif Path: {}", args.mindif_root)
+    logger.info("Output Directory: {}", args.output)
+    logger.info("Exclude Unclassified: {}", exclude_unclassified)
+    logger.info("Show Low Values in Legend: {}", show_low_val)
+    logger.info("Generate Rock Type ID Arrays: {}", id_arrays)
 
     tima_mindif_processor(
         args.project_path,
@@ -83,6 +90,16 @@ def main():
         exclude_unclassified,
         show_low_val,
         id_arrays,
+    )
+
+    end = time.time()
+    hours, rem = divmod(end - start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    logger.info(
+        "Tima MinDif Processor completed in {:0>2}:{:0>2}:{:05.2f}",
+        int(hours),
+        int(minutes),
+        seconds,
     )
 
 

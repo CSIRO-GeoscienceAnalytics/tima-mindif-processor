@@ -1,1 +1,1 @@
-rm -rf working
+rm -rf tests/test_output/*

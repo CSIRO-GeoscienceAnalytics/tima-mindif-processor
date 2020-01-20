@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProjectData revision="1">
+    <Origin>TESCAN TIMA 1.6.69 Offline</Origin>
+    <DataSet>
+        <DirName>1ff0813f-1dd2-4596-8ad3-b6e3e88e2df2</DirName>
+        <Color>red</Color>
+        <GUID>{1ff0813f-1dd2-4596-8ad3-b6e3e88e2df2}</GUID>
+        <Parent>{4a55d648-f57d-4926-8687-f5a8febf0a91}</Parent>
+        <JobName>Modal analysis #1</JobName>
+        <AnalysisType>Modal analysis</AnalysisType>
+    </DataSet>
+    <DataSet>
+        <DirName>5c4d2019-3c7b-4e19-abd6-93e6896de667</DirName>
+        <Color>lime</Color>
+        <GUID>{5c4d2019-3c7b-4e19-abd6-93e6896de667}</GUID>
+        <Parent>{db0c94c6-2518-4e0e-a9e0-279f69e9f4ca}</Parent>
+        <JobName>Modal analysis #1</JobName>
+        <AnalysisType>Modal analysis</AnalysisType>
+    </DataSet>
+    <DataSet>
+        <DirName>cf101107-2486-4c12-a62d-71b8b5ad81e2</DirName>
+        <Color>blue</Color>
+        <GUID>{cf101107-2486-4c12-a62d-71b8b5ad81e2}</GUID>
+        <Parent>{c7a8a225-df40-48b7-88eb-f42dd09e0260}</Parent>
+        <JobName>Modal analysis #1</JobName>
+        <AnalysisType>Modal analysis</AnalysisType>
+    </DataSet>
+</ProjectData>

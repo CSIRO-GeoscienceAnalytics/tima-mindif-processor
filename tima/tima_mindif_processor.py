@@ -8,6 +8,8 @@
 # For example:
 #   ./tima_mindif_processor.py "/media/sf_Y_DRIVE/Data/Evolution" "/media/sf_Y_DRIVE/Data/Adam Brown" "output"
 
+
+import time
 import os
 import os.path
 import math
@@ -29,7 +31,7 @@ def set_global(logger_):
     global xml_namespace
     global logger
     logger = logger_
-    
+
     if not xml_namespace:
         namespace = "http://www.tescan.cz/tima/1_4"
         xml_namespace = "{{{0}}}".format(namespace) if namespace else ""
@@ -41,7 +43,7 @@ def tima_mindif_processor(
     output_root: str,
     exclude_unclassified: bool = True,
     show_low_val: bool = True,
-    generate_id_array: bool = True
+    generate_id_array: bool = True,
 ):
     project_name = os.path.split(project_path)[1]
 
@@ -87,15 +89,30 @@ def tima_mindif_processor(
                     guid_and_sample_name.append(
                         (dataset.get("guid")[1:37], replicate.get("caption"))
                     )
-    func = partial(create_sample, mindif_root, output_root, exclude_unclassified, show_low_val, generate_id_array)
-    with multiprocessing.Pool(initializer=set_global, initargs=(logger, )) as pool:
+    func = partial(
+        create_sample,
+        mindif_root,
+        output_root,
+        exclude_unclassified,
+        show_low_val,
+        generate_id_array,
+    )
+    with multiprocessing.Pool(initializer=set_global, initargs=(logger,)) as pool:
         pool.map(func, guid_and_sample_name)
 
 
-def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool, show_low_val: bool, generate_id_array: bool, guid_and_sample_name):
+def create_sample(
+    mindif_root: str,
+    output_root: str,
+    exclude_unclassified: bool,
+    show_low_val: bool,
+    generate_id_array: bool,
+    guid_and_sample_name,
+):
+    start = time.time()
     guid = guid_and_sample_name[0]
     sample_name = guid_and_sample_name[1]
-    
+
     logger.debug("Sample: {} started processing", sample_name)
     thumbnail_path = os.path.join(output_root, sample_name + ".thumbnail.png")
     classification_path = os.path.join(output_root, sample_name + ".png")
@@ -103,11 +120,14 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     if os.path.exists(classification_path):
         logger.info("skipping {} because an image already exists for it.", sample_name)
         return
-    
+
     if generate_id_array:
         id_array_path = os.path.join(output_root, sample_name + ".csv.gz")
         if os.path.exists(id_array_path):
-            logger.info("Not generating id_array for sample {} because a csv already exists for it.", sample_name)
+            logger.info(
+                "Not generating id_array for sample {} because a csv already exists for it.",
+                sample_name,
+            )
             generate_id_array = False
 
     mindif_path = os.path.join(mindif_root, guid)
@@ -117,9 +137,7 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
 
     font_size = 24
     font_path = os.path.join(script_path, "fonts")
-    font = ImageFont.truetype(
-        os.path.join(font_path, "DejaVuSansMono.ttf"), font_size
-    )
+    font = ImageFont.truetype(os.path.join(font_path, "DejaVuSansMono.ttf"), font_size)
 
     legend_line_height = int(math.ceil(font_size * 1.3))
     legend_text_x_offset = legend_line_height * 2 - font_size
@@ -144,9 +162,7 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
 
     phases_xml_path = os.path.join(xml_path, "phases.xml")
     phases_xml = ET.parse(phases_xml_path)
-    phase_nodes = phases_xml.getroot().find(
-        "{0}PrimaryPhases".format(xml_namespace)
-    )
+    phase_nodes = phases_xml.getroot().find("{0}PrimaryPhases".format(xml_namespace))
     largest_name_width = 0
     phase_map = {}
 
@@ -190,6 +206,7 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     measurement_guid = re.sub("[^[a-f0-9]", "", measurement_guid)
 
     software_version = measurement_nodes.findtext("{0}Origin".format(xml_namespace))
+    logger.debug("Tima Software Version: {}", software_version)
 
     view_field_um = int(
         measurement_nodes.findtext("{0}ViewField".format(xml_namespace))
@@ -200,9 +217,9 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     image_height_px = int(
         measurement_nodes.findtext("{0}ImageHeight".format(xml_namespace))
     )
-    sample_shape = measurement_nodes.find(
-        "{}SampleDef".format(xml_namespace)
-    ).findtext("{0}SampleShape".format(xml_namespace))
+    sample_shape = measurement_nodes.find("{}SampleDef".format(xml_namespace)).findtext(
+        "{0}SampleShape".format(xml_namespace)
+    )
 
     if sample_shape == "Rectangle":
         sample_width_um = int(
@@ -215,9 +232,7 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
                 "{0}SampleHeight".format(xml_namespace)
             )
         )
-        sample_width_px = int(
-            (sample_width_um / float(view_field_um)) * image_width_px
-        )
+        sample_width_px = int((sample_width_um / float(view_field_um)) * image_width_px)
         sample_height_px = int(
             (sample_height_um / float(view_field_um)) * image_height_px
         )
@@ -230,9 +245,7 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
                 "{0}SampleDiameter".format(xml_namespace)
             )
         )
-        diameter_px = int(
-            (sample_diameter_um / float(view_field_um)) * image_width_px
-        )
+        diameter_px = int((sample_diameter_um / float(view_field_um)) * image_width_px)
         field_size = (diameter_px, diameter_px)
 
     # To right-align the numeric values we use "< 0.01" as the longest string then work out the offset
@@ -293,7 +306,7 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     # Prepare new canvas:
     png = Image.new("RGB", canvas_size, white)
     png_array = png.load()
-    if generate_id_array:    
+    if generate_id_array:
         phase_id_array = np.full(canvas_size, -1)
 
     classified_pixel_count = 0
@@ -342,14 +355,16 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
                 try:
                     phase_index = phases_array[x, y]
                     mask_index = mask_array[x, y]
-                    if (phase_index != 0 or not exclude_unclassified) and mask_index != 0:
+                    if (
+                        phase_index != 0 or not exclude_unclassified
+                    ) and mask_index != 0:
                         png_x = x + field_x
                         png_y = y + field_y
 
-                        png_array[x + field_x, y + field_y] = phase_map[
-                            phase_index
-                        ]["colour"]
-                        
+                        png_array[x + field_x, y + field_y] = phase_map[phase_index][
+                            "colour"
+                        ]
+
                         if generate_id_array:
                             phase_id_array[x + field_x, y + field_y] = phase_index
 
@@ -385,18 +400,14 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     phase_map = {k: v for k, v in phase_map.items() if v["histogram"] != 0}
 
     # Sort phase_map entries by histogram highest to lowest
-    phase_map = sorted(
-        phase_map.items(), key=lambda x: x[1]["histogram"], reverse=True
-    )
+    phase_map = sorted(phase_map.items(), key=lambda x: x[1]["histogram"], reverse=True)
 
     draw = ImageDraw.Draw(png)
 
     y = 0
     for id, phase_map_entry in phase_map:
-        if (
-            not show_low_val
-            and ((float(phase_map_entry["histogram"]) / classified_pixel_count * 100)
-            < 0.01)
+        if not show_low_val and (
+            (float(phase_map_entry["histogram"]) / classified_pixel_count * 100) < 0.01
         ):
             continue
 
@@ -416,9 +427,7 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
         text = get_percent_text(
             float(phase_map_entry["histogram"]) / classified_pixel_count * 100
         )
-        draw.text(
-            (percent_right_x - font.getsize(text)[0], y), text, black, font=font
-        )
+        draw.text((percent_right_x - font.getsize(text)[0], y), text, black, font=font)
         y += legend_line_height
 
     if not os.path.exists(output_root):
@@ -444,8 +453,18 @@ def create_sample(mindif_root: str, output_root: str, exclude_unclassified: bool
     logger.debug("Sample: {} imaged saved to {}", sample_name, classification_path)
 
     if generate_id_array:
-        np.savetxt(id_array_path, phase_id_array, fmt='%d', delimiter=',', newline='\n', header='', footer='', encoding=None)
+        np.savetxt(
+            id_array_path,
+            phase_id_array,
+            fmt="%d",
+            delimiter=",",
+            newline="\n",
+            header="",
+            footer="",
+        )
         logger.debug("Sample: {} id array saved to {}", sample_name, id_array_path)
 
+    end = time.time()
+    logger.info("Sample: {} completed processing in {:.1f} Seconds", sample_name, end - start)
     del draw
     del png

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProjectStructure revision="2">
+    <Info>
+        <Origin>TESCAN TIMA 1.6.69 Offline</Origin>
+    </Info>
+    <SurveyGroup guid="{4c011704-eaf0-4830-84f2-fd274214d83a}" caption="Surveys">
+        <Survey guid="{19937b9e-0ae6-4ba1-a694-b3fb85e3a7fc}" caption="Survey" dirName="19937b9e-0ae6-4ba1-a694-b3fb85e3a7fc" scheme="Nov19_ErnestHenry_RBJMS">
+            <Replicate guid="{4a55d648-f57d-4926-8687-f5a8febf0a91}" SampleHeight="26" SampleShape="Circle" SampleWidth="26" blockName="STA-107B" caption="STA-107B"/>
+            <Replicate guid="{db0c94c6-2518-4e0e-a9e0-279f69e9f4ca}" SampleHeight="26" SampleShape="Circle" SampleWidth="26" blockName="STA-237B" caption="STA-237B"/>
+            <Replicate guid="{c7a8a225-df40-48b7-88eb-f42dd09e0260}" SampleHeight="26" SampleShape="Circle" SampleWidth="26" blockName="STA-106B" caption="STA-106B"/>
+        </Survey>
+    </SurveyGroup>
+    <CustomColorsShapes>
+        <ColorShape type="Survey" caption="Survey">
+            <color>85 255 127</color>
+        </ColorShape>
+        <ColorShape type="Replicate" caption="STA-107B">
+            <color>blue</color>
+        </ColorShape>
+        <ColorShape type="Replicate" caption="STA-237B">
+            <color>lime</color>
+        </ColorShape>
+        <ColorShape type="Replicate" caption="STA-106B">
+            <color>red</color>
+        </ColorShape>
+    </CustomColorsShapes>
+</ProjectStructure>
