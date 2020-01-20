@@ -22,6 +22,8 @@ def rf_dir(folder):
 
 @pytest.fixture
 def clean_output():
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     rf_dir(output_dir)
 
 
