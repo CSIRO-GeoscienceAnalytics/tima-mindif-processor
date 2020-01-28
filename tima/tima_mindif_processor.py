@@ -76,9 +76,15 @@ def tima_mindif_processor(
         if survey_group is not None:
             for survey in survey_group.iterfind("Survey"):
                 for replicate in survey.iterfind("Replicate"):
-                    guid_and_sample_name.append(
-                        (rep_to_dir[replicate.get("guid")], replicate.get("caption"))
-                    )
+                    guid = replicate.get("guid")
+                    caption = replicate.get("caption")
+                    if guid is not None and caption is not None and guid in rep_to_dir:
+                        guid_and_sample_name.append(
+                            (rep_to_dir[guid], caption)
+                        )
+                    else:
+                        logger.warning("Something went wrong adding a sample to the list GUID: {}, Caption: {}", guid, caption)
+                        logger.warning("Dataset {} may be missing from {}", guid, data_xml_path)
         else:
             logger.error(
                 "SurveryGroup element could not be found in {}", struct_xml_path
