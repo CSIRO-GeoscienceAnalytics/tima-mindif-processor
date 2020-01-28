@@ -1,6 +1,7 @@
 import sys
 import os, shutil
 import pytest
+import mock
 from loguru import logger
 from tima.tima_mindif_processor import tima_mindif_processor
 
@@ -40,23 +41,25 @@ def mp_logger():
 
 
 def test_16_run(mp_logger, clean_output):
-    try:
-        tima_mindif_processor(
-            os.path.join(dirname, "test_data", "STA_Test"),
-            os.path.join(dirname, "test_data", "STA_Test_MinDif"),
-            output_dir,
-        )
-    except Exception:
-        pytest.fail("Exception Caught running 1.6 Test")
+    with mock.patch("builtins.input", return_value="yes"):
+        try:
+            tima_mindif_processor(
+                os.path.join(dirname, "test_data", "STA_Test"),
+                os.path.join(dirname, "test_data", "STA_Test_MinDif"),
+                output_dir,
+            )
+        except Exception:
+            pytest.fail("Exception Caught running 1.6 Test")
 
 
 def test_16_run_with_id_array(mp_logger, clean_output):
-    try:
-        tima_mindif_processor(
-            os.path.join(dirname, "test_data", "STA_Test"),
-            os.path.join(dirname, "test_data", "STA_Test_MinDif"),
-            output_dir,
-            generate_id_array=True,
-        )
-    except Exception:
-        pytest.fail("Exception Caught running 1.6 Test with ID array")
+    with mock.patch("builtins.input", return_value="yes"):
+        try:
+            tima_mindif_processor(
+                os.path.join(dirname, "test_data", "STA_Test"),
+                os.path.join(dirname, "test_data", "STA_Test_MinDif"),
+                output_dir,
+                generate_id_array=True,
+            )
+        except Exception:
+            pytest.fail("Exception Caught running 1.6 Test with ID array")

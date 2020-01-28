@@ -58,7 +58,6 @@ def main():
         level="INFO" if not args.verbose else "DEBUG",
         format="<green>{time:HH:mm:ss}</green> | <cyan>{process}</cyan> | <level>{message}</level>",
     )
-    start = time.time()
 
     if not os.path.exists(args.project_path):
         logger.error("Could not find: {}", args.project_path)
@@ -89,16 +88,6 @@ def main():
         show_low_val=show_low_val,
         create_thumbnail=create_thumbnail,
         generate_id_array=id_arrays,
-    )
-
-    end = time.time()
-    hours, rem = divmod(end - start, 3600)
-    minutes, seconds = divmod(rem, 60)
-    logger.info(
-        "Tima MinDif Processor completed in {:0>2}:{:0>2}:{:05.2f}",
-        int(hours),
-        int(minutes),
-        seconds,
     )
 
 

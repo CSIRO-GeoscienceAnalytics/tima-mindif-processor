@@ -10,6 +10,7 @@
 
 
 import time
+import signal
 import os
 import os.path
 import math
@@ -36,7 +37,7 @@ def set_global(logger_):
     global XML_NAMESPACE
     global logger
     logger = logger_
-
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
     if not XML_NAMESPACE:
         namespace = "http://www.tescan.cz/tima/1_4"
         XML_NAMESPACE = "{{{0}}}".format(namespace) if namespace else ""
@@ -51,6 +52,7 @@ def tima_mindif_processor(
     show_low_val: bool = True,
     generate_id_array: bool = True,
 ):
+    start = time.time()
     project_name = os.path.split(project_path)[1]
 
     logger.info("Project Name: {}", project_name)
@@ -110,12 +112,29 @@ def tima_mindif_processor(
         create_thumbnail,
         generate_id_array,
     )
-    with multiprocessing.Pool(initializer=set_global, initargs=(logger,)) as pool:
-        try:
-            pool.map(func, guid_and_sample_name)
-        finally:
-            pool.close()  # Marks the pool as closed.
-            pool.join()
+    
+    try:
+        pool = multiprocessing.Pool(initializer=set_global, initargs=(logger,))
+        pool.map(func, guid_and_sample_name)
+        end = time.time()
+        hours, rem = divmod(end - start, 3600)
+        minutes, seconds = divmod(rem, 60)
+        logger.info(
+            "Tima MinDif Processor completed in {:0>2}:{:0>2}:{:05.2f}",
+            int(hours),
+            int(minutes),
+            seconds,
+        )
+        logger.warning("Press Enter to terminate")
+        input("")
+    except KeyboardInterrupt:
+        logger.warning("Caught KeyboardInterrupt, terminating workers")
+        pool.terminate()
+    else:
+        logger.info("Sample processing complete")
+        pool.close()  # Marks the pool as closed.
+    finally:
+        pool.join()    
 
 
 def create_sample(

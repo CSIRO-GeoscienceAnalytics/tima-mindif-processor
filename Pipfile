@@ -12,6 +12,7 @@ gitchangelog = "*"
 pytest = "*"
 pytest-cov = "*"
 coverage-badge = "*"
+mock = "*"
 
 [packages]
 pillow = "*"
