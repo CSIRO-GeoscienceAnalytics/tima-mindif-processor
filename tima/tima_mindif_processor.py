@@ -172,10 +172,14 @@ def create_sample(
     white = (255, 255, 255)
     black = (0, 0, 0)
 
+    sample_name_font_size = 36
     font_size = 24
     font_path = os.path.join(SCRIPT_PATH, "fonts")
+    sample_name_font = ImageFont.truetype(os.path.join(font_path, "DejaVuSansMono.ttf"), sample_name_font_size)
     font = ImageFont.truetype(os.path.join(font_path, "DejaVuSansMono.ttf"), font_size)
 
+    sample_name_line_height = int(math.ceil(sample_name_font_size * 1.3))
+    legend_text_y_offset = int(math.ceil(sample_name_line_height * 1.5))
     legend_line_height = int(math.ceil(font_size * 1.3))
     legend_text_x_offset = legend_line_height * 2 - font_size
 
@@ -439,8 +443,13 @@ def create_sample(
     phase_map = sorted(phase_map.items(), key=lambda x: x[1]["histogram"], reverse=True)
 
     draw = ImageDraw.Draw(png)
-
-    y = 0
+    draw.text(
+            (legend_start_x, 5),
+            sample_name,
+            black,
+            font=sample_name_font,
+        )
+    y = legend_text_y_offset
     for id, phase_map_entry in phase_map:
         if not show_low_val and (
             (float(phase_map_entry["histogram"]) / classified_pixel_count * 100) < 0.01
