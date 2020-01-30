@@ -59,7 +59,9 @@ def test_16_run_with_id_array(mp_logger, clean_output):
                 os.path.join(dirname, "test_data", "STA_Test"),
                 os.path.join(dirname, "test_data", "STA_Test_MinDif"),
                 output_dir,
+                create_thumbnail=True,
                 generate_id_array=True,
+                generate_bse=True,
             )
         except Exception:
             pytest.fail("Exception Caught running 1.6 Test with ID array")

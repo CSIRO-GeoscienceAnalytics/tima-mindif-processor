@@ -43,6 +43,12 @@ def parse_args(args):
         action="store_true",
         help="Generate Rock Type ID Arrays for each sample.",
     )
+    parser.add_argument(
+        "--bse",
+        "-b",
+        action="store_true",
+        help="Generate the stitched together BSE image.",
+    )
     parser.add_argument("--thumbs", action="store_true", help="Create thumbnails.")
     return parser.parse_args(args)
 
@@ -71,6 +77,7 @@ def main():
     show_low_val: bool = True if args.show_low_val else False
     id_arrays: bool = True if args.id_arrays else False
     create_thumbnail: bool = True if args.thumbs else False
+    generate_bse: bool = True if args.bse else False
 
     logger.info("Starting Tima MinDif Processor with the following settings")
     logger.info("Project Path: {}", args.project_path)
@@ -88,6 +95,7 @@ def main():
         show_low_val=show_low_val,
         create_thumbnail=create_thumbnail,
         generate_id_array=id_arrays,
+        generate_bse=generate_bse,
     )
 
 

@@ -51,6 +51,7 @@ def tima_mindif_processor(
     create_thumbnail: bool = False,
     show_low_val: bool = True,
     generate_id_array: bool = True,
+    generate_bse: bool = True
 ):
     start = time.time()
     project_name = os.path.split(project_path)[1]
@@ -85,7 +86,8 @@ def tima_mindif_processor(
                             (rep_to_dir[guid], caption)
                         )
                     else:
-                        logger.warning("Something went wrong adding a sample to the list GUID: {}, Caption: {}", guid, caption)
+                        logger.warning("Something went wrong adding a sample to the list GUID: " +
+                                       "{}, Caption: {}", guid, caption)
                         logger.warning("Dataset {} may be missing from {}", guid, data_xml_path)
         else:
             logger.error(
@@ -111,8 +113,9 @@ def tima_mindif_processor(
         show_low_val,
         create_thumbnail,
         generate_id_array,
+        generate_bse
     )
-    
+
     try:
         pool = multiprocessing.Pool(initializer=set_global, initargs=(logger,))
         pool.map(func, guid_and_sample_name)
@@ -144,8 +147,10 @@ def create_sample(
     show_low_val: bool,
     create_thumbnail: bool,
     generate_id_array: bool,
+    generate_bse: bool,
     guid_and_sample_name,
 ):
+    
     start = time.time()
     guid = guid_and_sample_name[0]
     sample_name = guid_and_sample_name[1]
@@ -157,6 +162,15 @@ def create_sample(
     if os.path.exists(classification_path):
         logger.info("skipping {} because an image already exists for it.", sample_name)
         return
+
+    if generate_bse:
+        bse_path = os.path.join(output_root, sample_name + "_bse.png")
+        if os.path.exists(bse_path):
+            logger.info(
+                "Not generating bse png for sample {} because a file already exists for it.",
+                sample_name,
+            )
+            generate_bse = False
 
     if generate_id_array:
         id_array_path = os.path.join(output_root, sample_name + ".csv.gz")
@@ -347,8 +361,13 @@ def create_sample(
     # Prepare new canvas:
     png = Image.new("RGB", canvas_size, white)
     png_array = png.load()
+
+    if generate_bse:
+        bse_png = Image.new("RGB", field_size, white)
+        bse_png_array = bse_png.load()
+
     if generate_id_array:
-        phase_id_array = np.full(canvas_size, -1)
+        phase_id_array = np.full(field_size, -1)
 
     classified_pixel_count = 0
 
@@ -360,6 +379,7 @@ def create_sample(
     thumbnail_y_max = -1
 
     has_missing_file = False
+    has_missing_bse = False
     for field_name, field_x, field_y in fields:
         field_phase_map = copy.deepcopy(empty_phase_map)
 
@@ -384,6 +404,19 @@ def create_sample(
                 field_name,
             )
             has_missing_file = True
+        
+        if generate_bse:
+            try:
+                bse = Image.open(field_path_format.format(field_name, "bse.png"))
+                bse_array = bse.load()
+            except Exception:
+                logger.error(
+                    "Error: {}, {}, field {} does not have bse.png",
+                    guid,
+                    sample_name,
+                    field_name,
+                )
+                has_missing_bse = True
 
         if has_missing_file:
             continue
@@ -396,13 +429,18 @@ def create_sample(
                 try:
                     phase_index = phases_array[x, y]
                     mask_index = mask_array[x, y]
+
+                    png_x = x + field_x
+                    png_y = y + field_y
+
+                    if generate_bse and not has_missing_bse:
+                        bse_png_array[png_x, png_y] = bse_array[x, y]
+
                     if (
                         phase_index != 0 or not exclude_unclassified
                     ) and mask_index != 0:
-                        png_x = x + field_x
-                        png_y = y + field_y
-
-                        png_array[x + field_x, y + field_y] = phase_map[phase_index][
+                        
+                        png_array[png_x, png_y] = phase_map[phase_index][
                             "colour"
                         ]
 
@@ -495,7 +533,11 @@ def create_sample(
     # Add the circle to the original image and save
     # draw.arc([0, 0, field_size[0], field_size[1]], 0, 360, black)
     png.save(classification_path)
-    logger.debug("Sample: {} imaged saved to {}", sample_name, classification_path)
+    logger.debug("Sample: {} image saved to {}", sample_name, classification_path)
+
+    if generate_bse:
+        bse_png.save(bse_path)
+        logger.debug("Sample: {} BSE image saved to {}", sample_name, bse_path)
 
     if generate_id_array:
         np.savetxt(
