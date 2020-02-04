@@ -378,11 +378,10 @@ def create_sample(
     thumbnail_y_min = 1000000000
     thumbnail_y_max = -1
 
-    has_missing_file = False
-    has_missing_bse = False
     for field_name, field_x, field_y in fields:
         field_phase_map = copy.deepcopy(empty_phase_map)
-
+        has_missing_file = False
+        has_missing_bse = False
         try:
             phases = Image.open(field_path_format.format(field_name, "phases.tif"))
         except Exception:
@@ -555,3 +554,4 @@ def create_sample(
     logger.info("Sample: {} completed processing in {:.1f} Seconds", sample_name, end - start)
     del draw
     del png
+    del bse_png
