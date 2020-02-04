@@ -21,7 +21,7 @@ import numpy as np
 from functools import partial
 import xml.etree.ElementTree as ET
 from loguru import logger
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageColor
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 XML_NAMESPACE = None
@@ -339,12 +339,12 @@ def create_sample(
             # so this value gets inverted.
             # and       +y to mean down, which is the same as monitor coordinate system,
             # so this value doesn't get inverted.
-            x = round(
+            x = math.floor(
                 -float(field_node.get("x")) / pixel_spacing
                 + origin[0]
                 - (image_width_px / 2)
             )
-            y = round(
+            y = math.floor(
                 float(field_node.get("y")) / pixel_spacing
                 + origin[1]
                 - (image_height_px / 2)
@@ -363,7 +363,7 @@ def create_sample(
     png_array = png.load()
 
     if generate_bse:
-        bse_png = Image.new("RGB", field_size, white)
+        bse_png = Image.new("I;16", field_size, 65535)
         bse_png_array = bse_png.load()
 
     if generate_id_array:
@@ -471,8 +471,8 @@ def create_sample(
         )
 
     if has_missing_file:
-        logger.error("Error: not processing {} due to missing files.", guid)
-        return
+        logger.warning("Warning: sample {} is missing fields.", sample_name)
+        # return
 
     # Remove phase_map entries where histogram == 0
     phase_map = {k: v for k, v in phase_map.items() if v["histogram"] != 0}
