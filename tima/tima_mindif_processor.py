@@ -537,6 +537,7 @@ def create_sample(
     if generate_bse:
         bse_png.save(bse_path)
         logger.debug("Sample: {} BSE image saved to {}", sample_name, bse_path)
+        del bse_png
 
     if generate_id_array:
         np.savetxt(
@@ -554,4 +555,4 @@ def create_sample(
     logger.info("Sample: {} completed processing in {:.1f} Seconds", sample_name, end - start)
     del draw
     del png
-    del bse_png
+        
