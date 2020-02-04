@@ -8,7 +8,7 @@ setup(
     description="TIMA Min Dif Processor",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version="1.5.1",
+    version="1.5.2",
     packages=["tima"],
     maintainer="Samuel Bradley",
     maintainer_email="sam.bradley@csiro.au",
