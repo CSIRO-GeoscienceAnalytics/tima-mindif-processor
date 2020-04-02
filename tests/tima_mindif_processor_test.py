@@ -47,6 +47,9 @@ def test_16_run(mp_logger, clean_output):
                 os.path.join(dirname, "test_data", "STA_Test"),
                 os.path.join(dirname, "test_data", "STA_Test_MinDif"),
                 output_dir,
+                create_thumbnail=False,
+                generate_id_array=False,
+                generate_bse=False,
             )
         except Exception:
             pytest.fail("Exception Caught running 1.6 Test")

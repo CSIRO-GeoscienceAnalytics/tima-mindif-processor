@@ -9,7 +9,7 @@
 install from pypi
 
 ```
-pip install tima-mindef
+pip install tima-mindif
 ```
 
 Install direct from git (Note: this is currently a private repository)
@@ -36,10 +36,10 @@ pipenv shell
 
 ## Usage
 
-Once it's installed use the command 'tima-mindef'
+Once it's installed use the command 'tima-mindif'
 
 ```
-tima-mindef -h
+tima-mindif -h
 
 usage: tima-mindif [-h] [--output OUTPUT] [--verbose] [--exclude-unclassified]
                    [--show-low-val] [--thumbs]
@@ -64,10 +64,10 @@ optional arguments:
 ```
 
 The script should be executed in the following manner:
-tima-mindef tima_mindif_processor.py project/path mindif_root output_root
+tima-mindif tima_mindif_processor.py project/path mindif_root output_root
 
 For example:
 
 ```
-tima-mindef "/media/sf_Y_DRIVE/Data/Evolution" "/media/sf_Y_DRIVE/Data/Adam Brown" -o ./output
+tima-mindif "/media/sf_Y_DRIVE/Data/Evolution" "/media/sf_Y_DRIVE/Data/Adam Brown" -o ./output
 ```
