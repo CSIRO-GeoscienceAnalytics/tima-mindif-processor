@@ -51,7 +51,7 @@ def tima_mindif_processor(
     create_thumbnail: bool = False,
     show_low_val: bool = True,
     generate_id_array: bool = True,
-    generate_bse: bool = True
+    generate_bse: bool = True,
 ):
     start = time.time()
     project_name = os.path.split(project_path)[1]
@@ -82,13 +82,17 @@ def tima_mindif_processor(
                     guid = replicate.get("guid")
                     caption = replicate.get("caption")
                     if guid is not None and caption is not None and guid in rep_to_dir:
-                        guid_and_sample_name.append(
-                            (rep_to_dir[guid], caption)
-                        )
+                        guid_and_sample_name.append((rep_to_dir[guid], caption))
                     else:
-                        logger.warning("Something went wrong adding a sample to the list GUID: " +
-                                       "{}, Caption: {}", guid, caption)
-                        logger.warning("Dataset {} may be missing from {}", guid, data_xml_path)
+                        logger.warning(
+                            "Something went wrong adding a sample to the list GUID: "
+                            + "{}, Caption: {}",
+                            guid,
+                            caption,
+                        )
+                        logger.warning(
+                            "Dataset {} may be missing from {}", guid, data_xml_path
+                        )
         else:
             logger.error(
                 "SurveryGroup element could not be found in {}", struct_xml_path
@@ -113,7 +117,7 @@ def tima_mindif_processor(
         show_low_val,
         create_thumbnail,
         generate_id_array,
-        generate_bse
+        generate_bse,
     )
 
     try:
@@ -137,7 +141,7 @@ def tima_mindif_processor(
         logger.info("Sample processing complete")
         pool.close()  # Marks the pool as closed.
     finally:
-        pool.join()    
+        pool.join()
 
 
 def create_sample(
@@ -150,7 +154,7 @@ def create_sample(
     generate_bse: bool,
     guid_and_sample_name,
 ):
-    
+
     start = time.time()
     guid = guid_and_sample_name[0]
     sample_name = guid_and_sample_name[1]
@@ -189,7 +193,9 @@ def create_sample(
     sample_name_font_size = 36
     font_size = 24
     font_path = os.path.join(SCRIPT_PATH, "fonts")
-    sample_name_font = ImageFont.truetype(os.path.join(font_path, "DejaVuSansMono.ttf"), sample_name_font_size)
+    sample_name_font = ImageFont.truetype(
+        os.path.join(font_path, "DejaVuSansMono.ttf"), sample_name_font_size
+    )
     font = ImageFont.truetype(os.path.join(font_path, "DejaVuSansMono.ttf"), font_size)
 
     sample_name_line_height = int(math.ceil(sample_name_font_size * 1.3))
@@ -403,7 +409,7 @@ def create_sample(
                 field_name,
             )
             has_missing_file = True
-        
+
         if generate_bse:
             try:
                 bse = Image.open(field_path_format.format(field_name, "bse.png"))
@@ -422,12 +428,13 @@ def create_sample(
 
         phases_array = phases.load()
         mask_array = mask.load()
-
+        if field_y == 2050:
+            print("Mask is 0")
         for y in range(0, image_height_px):
             for x in range(0, image_width_px):
                 try:
                     phase_index = phases_array[x, y]
-                    mask_index = mask_array[x, y]
+                    mask_index = mask_array[y, x]  # For some reason mask is reversed
 
                     png_x = x + field_x
                     png_y = y + field_y
@@ -438,10 +445,7 @@ def create_sample(
                     if (
                         phase_index != 0 or not exclude_unclassified
                     ) and mask_index != 0:
-                        
-                        png_array[png_x, png_y] = phase_map[phase_index][
-                            "colour"
-                        ]
+                        png_array[png_x, png_y] = phase_map[phase_index]["colour"]
 
                         if generate_id_array:
                             phase_id_array[x + field_x, y + field_y] = phase_index
@@ -481,11 +485,8 @@ def create_sample(
 
     draw = ImageDraw.Draw(png)
     draw.text(
-            (legend_start_x, 5),
-            sample_name,
-            black,
-            font=sample_name_font,
-        )
+        (legend_start_x, 5), sample_name, black, font=sample_name_font,
+    )
     y = legend_text_y_offset
     for id, phase_map_entry in phase_map:
         if not show_low_val and (
@@ -552,7 +553,8 @@ def create_sample(
         logger.debug("Sample: {} id array saved to {}", sample_name, id_array_path)
 
     end = time.time()
-    logger.info("Sample: {} completed processing in {:.1f} Seconds", sample_name, end - start)
+    logger.info(
+        "Sample: {} completed processing in {:.1f} Seconds", sample_name, end - start
+    )
     del draw
     del png
-        

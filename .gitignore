@@ -128,3 +128,4 @@ dmypy.json
 working/
 output/**
 local/
+tests/test_data/Cloncurry*/
