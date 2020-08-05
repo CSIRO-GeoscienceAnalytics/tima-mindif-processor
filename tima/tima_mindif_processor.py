@@ -448,7 +448,7 @@ def create_sample(
                         png_array[png_x, png_y] = phase_map[phase_index]["colour"]
 
                         if generate_id_array:
-                            phase_id_array[x + field_x, y + field_y] = phase_index
+                            phase_id_array[y + field_y, x + field_x] = phase_index
 
                         thumbnail_x_min = min(thumbnail_x_min, png_x)
                         thumbnail_x_max = max(thumbnail_x_max, png_x)
