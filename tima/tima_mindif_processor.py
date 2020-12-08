@@ -534,7 +534,7 @@ def create_sample(
             UNK_THRESHOLD = int(x * y * (UNK_THRESHOLD_PC / 100))  # 15%
             if unk_count > UNK_THRESHOLD:
                 logger.warning(
-                    f"Sample: {sample_name} Field: {field_name} contains greater than {UNK_THRESHOLD_PC}% of Unclassified."
+                    f"Sample: {sample_name} Field: {field_name} GUID: {guid} contains greater than {UNK_THRESHOLD_PC}% of Unclassified."
                 )
             # Once all the pixels have been dealt with we can create the insert commands for this field:
             field_phase_map = {
