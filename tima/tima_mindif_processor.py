@@ -486,7 +486,7 @@ def create_sample(
                         if generate_bse and not has_missing_bse:
                             bse_png_array[png_x, png_y] = bse_array[x, y]
 
-                        if phase_index == 0:
+                        if phase_index == 0 and mask_index != 0:
                             unk_count += 1
 
                         if (
