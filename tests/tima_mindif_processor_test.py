@@ -86,17 +86,17 @@ def test_16_run_with_id_array(mp_logger, clean_output):
             pytest.fail("Exception Caught running 1.6 Test with ID array")
 
 
-def test_16_run_debug(mp_logger, clean_output):
-    with mock.patch("builtins.input", return_value="yes"):
-        try:
-            tima_mindif_processor(
-                os.path.join(dirname, "test_data", "Cloncurry METAL"),
-                os.path.join(dirname, "test_data", "Cloncurry METAL_MinDif"),
-                output_dir,
-                exclude_unclassified=False,
-                create_thumbnail=False,
-                generate_id_array=False,
-                generate_bse=False,
-            )
-        except Exception:
-            pytest.fail("Exception Caught running 1.6 Test")
+# def test_16_run_debug(mp_logger, clean_output):
+#     with mock.patch("builtins.input", return_value="yes"):
+#         try:
+#             tima_mindif_processor(
+#                 os.path.join(dirname, "test_data", "Cloncurry METAL"),
+#                 os.path.join(dirname, "test_data", "Cloncurry METAL_MinDif"),
+#                 output_dir,
+#                 exclude_unclassified=False,
+#                 create_thumbnail=False,
+#                 generate_id_array=False,
+#                 generate_bse=False,
+#             )
+#         except Exception:
+#             pytest.fail("Exception Caught running 1.6 Test")
