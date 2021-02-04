@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportedMeasurementData Revision="1" xmlns="http://www.tescan.cz/tima/1_4">
+    <Id>{353a5a30-f3d4-421a-9c2a-09000823963f}</Id>
+    <StartDate>2020-10-18T18:46:56+08:00</StartDate>
+    <Origin>TESCAN TIMA 2.1.1 Offline</Origin>
+    <ViewField>1000</ViewField>
+    <ImageWidth>100</ImageWidth>
+    <ImageHeight>100</ImageHeight>
+    <SemImages>
+        <SemImage>
+            <FileName>bse.png</FileName>
+            <Caption>BSE</Caption>
+        </SemImage>
+    </SemImages>
+    <SampleDef>
+        <SampleShape>Circle</SampleShape>
+        <SampleDiameter>23000</SampleDiameter>
+    </SampleDef>
+</ExportedMeasurementData>

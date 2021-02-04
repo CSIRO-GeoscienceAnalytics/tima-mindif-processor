@@ -67,7 +67,7 @@ def tima_mindif_processor(
     guid_and_sample_name = []
 
     is_16 = False
-    data_file = None
+    data_file = ""
     struct_file = None
     for file in os.listdir(project_path):
         if file.endswith(".timaproj.data"):
@@ -79,11 +79,12 @@ def tima_mindif_processor(
     if is_16:
         if struct_file is None:
             sys.exit(
-                "Could not find a file in the project folder ending with .timaproj.struct. Please ensure project is a valid for TIMA 1.6"
+                "Could not find a file in the project folder ending with .timaproj.struct. "
+                + "Please ensure project is a valid for TIMA 1.6+"
             )
 
         data_xml_path = os.path.join(project_path, data_file)
-        logger.info(f"File {data_xml_path} exists, configuring for TIMA 1.6")
+        logger.info(f"File {data_xml_path} exists, configuring for TIMA 1.6+")
         data_xml = ET.parse(data_xml_path)
         project_data = data_xml.getroot()
 
@@ -478,7 +479,7 @@ def create_sample(
                         phase_index: int = int(phases_array[x, y])
 
                         mask_index = mask_array[
-                            y, x
+                            x, y
                         ]  # For some reason mask is reversed
                         png_x = x + field_x
                         png_y = y + field_y
@@ -559,10 +560,7 @@ def create_sample(
 
         draw = ImageDraw.Draw(png)
         draw.text(
-            (legend_start_x, 5),
-            sample_name,
-            black,
-            font=sample_name_font,
+            (legend_start_x, 5), sample_name, black, font=sample_name_font,
         )
         y = legend_text_y_offset
         for id, phase_map_entry in phase_map:

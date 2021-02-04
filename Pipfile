@@ -12,9 +12,9 @@ gitchangelog = "*"
 pytest = "*"
 pytest-cov = "*"
 mock = "*"
+tima-mindif = { editable = true, path = "." }
 
 [packages]
 pillow = "*"
-tima-mindef = {editable = true,path = "."}
 loguru = "*"
 numpy = "*"

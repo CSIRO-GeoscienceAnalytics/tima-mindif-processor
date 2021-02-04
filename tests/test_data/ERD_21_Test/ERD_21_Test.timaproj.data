@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProjectData revision="1">
+    <Origin>TESCAN TIMA 2.1.1 Offline</Origin>
+    <DataSet>
+        <DirName>353a5a30-f3d4-421a-9c2a-09000823963f</DirName>
+        <Color>yellow</Color>
+        <GUID>{353a5a30-f3d4-421a-9c2a-09000823963f}</GUID>
+        <Parent>{60f0f64d-ce4d-4339-bc62-f91ac607d251}</Parent>
+        <JobName>10um_modal #1</JobName>
+        <AnalysisType>Modal analysis</AnalysisType>
+    </DataSet>
+    <DataSet>
+        <DirName>d6b974f1-819f-4e1c-9574-af02bcf58c01</DirName>
+        <Color>navy</Color>
+        <GUID>{d6b974f1-819f-4e1c-9574-af02bcf58c01}</GUID>
+        <Parent>{f842fcaa-4945-4439-86d0-786bcbd69081}</Parent>
+        <JobName>10um_modal #1</JobName>
+        <AnalysisType>Modal analysis</AnalysisType>
+    </DataSet>
+</ProjectData>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ProjectStructure revision="2">
+    <Info>
+        <Origin>TESCAN TIMA 2.1.1 Offline</Origin>
+    </Info>
+    <SurveyGroup guid="{c242884c-3c81-4869-ac5b-4c8d7e6b73e1}" caption="Surveys">
+        <Survey guid="{d084fd60-3b13-42a8-943c-06858c643383}" caption="18Oct20" dirName="d084fd60-3b13-42a8-943c-06858c643383" scheme="MountMagnet_v9">
+            <Replicate guid="{60f0f64d-ce4d-4339-bc62-f91ac607d251}" SampleHeight="26" SampleShape="Circle" SampleWidth="26" StandardSample="RESIN_30" blockName="GXDD0089-286.4" caption="GXDD0089-286.4"/>
+            <Replicate guid="{f842fcaa-4945-4439-86d0-786bcbd69081}" SampleHeight="26" SampleShape="Circle" SampleWidth="26" StandardSample="RESIN_30" blockName="GXDD0103-49" caption="GXDD0103-49"/>
+        </Survey>
+    </SurveyGroup>
+    <CustomColorsShapes>
+        <ColorShape type="Survey" caption="18Oct20">
+            <color>85 85 127</color>
+        </ColorShape>
+        <ColorShape type="Replicate" caption="GXDD0089-286.4">
+            <color>255 85 255</color>
+        </ColorShape>
+        <ColorShape type="Replicate" caption="GXDD0103-49">
+            <color>255 85 127</color>
+        </ColorShape>
+    </CustomColorsShapes>
+    <SortingOrder type="Replicate" customSort="1">
+        <Item>GXDD0089-286.4</Item>
+        <Item>GXDD0103-49</Item>
+    </SortingOrder>
+</ProjectStructure>
