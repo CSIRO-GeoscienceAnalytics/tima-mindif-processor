@@ -14,7 +14,7 @@ setup(
     maintainer_email="sam.bradley@csiro.au",
     python_requires=">=3.5, <4",
     entry_points={"console_scripts": ["tima-mindif=tima.__main__:main"]},
-    install_requires=["pillow", "loguru", "numpy"],
+    install_requires=["pillow >= 8.1.0", "loguru", "numpy"],
     include_package_data=True,
     license="MIT",
     url="https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor",

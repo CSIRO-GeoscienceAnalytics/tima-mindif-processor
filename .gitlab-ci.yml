@@ -34,6 +34,11 @@ flake8:
   allow_failure: true
   script:
     - flake8 --max-line-length=110 tima/*.py
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+      allow_failure: true
 
 pylint:
   stage: Static Analysis
@@ -43,12 +48,21 @@ pylint:
     policy: pull
   script:
     - pylint --rcfile=setup.cfg tima
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
+      allow_failure: true
 
 pytest:
   stage: Test
   script:
     - pytest --cov=tima
   coverage: "/TOTAL.+ ([0-9]{1,3}%)/"
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
 
 ########  ######## ##       ########    ###     ######  ########
 ##     ## ##       ##       ##         ## ##   ##    ## ##
