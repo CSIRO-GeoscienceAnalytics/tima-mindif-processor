@@ -49,6 +49,30 @@ def set_global(logger_):
         XML_NAMESPACE = "{{{0}}}".format(namespace) if namespace else ""
 
 
+def get_suvery_sample_info(survey_group: ET.Element, rep_to_dir: dict):
+    if survey_group is None:
+        return []
+    guid_and_sample_name = []
+    for survey in survey_group.iterfind("Survey"):
+        for replicate in survey.iterfind("Replicate"):
+            guid = replicate.get("guid")
+            caption = replicate.get("caption")
+            if guid is not None and caption is not None and guid in rep_to_dir:
+                logger.debug(
+                    f"Adding Sample for processing GUID: {rep_to_dir[guid]} Caption: {caption}"
+                )
+                guid_and_sample_name.append((rep_to_dir[guid], caption))
+            else:
+                logger.warning(
+                    "Something went wrong adding a sample to the list GUID: "
+                    + "{}, Caption: {}",
+                    guid,
+                    caption,
+                )
+                logger.warning("Dataset {} may be missing from the .data file", guid)
+    return guid_and_sample_name
+
+
 def tima_mindif_processor(
     project_path: str,
     mindif_root: str,
@@ -82,7 +106,7 @@ def tima_mindif_processor(
                 "Could not find a file in the project folder ending with .timaproj.struct. "
                 + "Please ensure project is a valid for TIMA 1.6+"
             )
-
+        logger.info(f"File {struct_file} exists")
         data_xml_path = os.path.join(project_path, data_file)
         logger.info(f"File {data_xml_path} exists, configuring for TIMA 1.6+")
         data_xml = ET.parse(data_xml_path)
@@ -98,23 +122,22 @@ def tima_mindif_processor(
 
         # Get the names of the samples and the GUID that they're mapped to:
         survey_group = struct_data.find("SurveyGroup")
-        if survey_group is not None:
-            for survey in survey_group.iterfind("Survey"):
-                for replicate in survey.iterfind("Replicate"):
-                    guid = replicate.get("guid")
-                    caption = replicate.get("caption")
-                    if guid is not None and caption is not None and guid in rep_to_dir:
-                        guid_and_sample_name.append((rep_to_dir[guid], caption))
-                    else:
-                        logger.warning(
-                            "Something went wrong adding a sample to the list GUID: "
-                            + "{}, Caption: {}",
-                            guid,
-                            caption,
-                        )
-                        logger.warning(
-                            "Dataset {} may be missing from {}", guid, data_xml_path
-                        )
+        if survey_group.find("SurveyGroup") is not None:
+            logger.info("Detected a sub group of suverys")
+            for survey_sub_group in survey_group.iterfind("SurveyGroup"):
+                logger.info(
+                    f"Adding samples from SurveyGroup {survey_sub_group.get('caption')}"
+                )
+                guid_and_sample_name.extend(
+                    get_suvery_sample_info(survey_sub_group, rep_to_dir)
+                )
+        elif survey_group is not None:
+            logger.info(
+                f"Adding samples from SurveyGroup {survey_group.get('caption')}"
+            )
+            guid_and_sample_name.extend(
+                get_suvery_sample_info(survey_group, rep_to_dir)
+            )
         else:
             logger.error(
                 "SurveryGroup element could not be found in {}", struct_xml_path
@@ -534,7 +557,7 @@ def create_sample(
             UNK_THRESHOLD_PC = 15
             UNK_THRESHOLD = int(x * y * (UNK_THRESHOLD_PC / 100))  # 15%
             if unk_count > UNK_THRESHOLD:
-                logger.warning(
+                logger.debug(
                     f"Sample: {sample_name} Field: {field_name} GUID: {guid} contains greater than {UNK_THRESHOLD_PC}% of Unclassified."
                 )
             # Once all the pixels have been dealt with we can create the insert commands for this field:
