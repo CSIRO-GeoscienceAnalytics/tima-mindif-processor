@@ -1,8 +1,10 @@
 # TIMA Mindif Processor v2.0.1
 
 [![PyPI version](https://badge.fury.io/py/tima-mindif.svg)](https://badge.fury.io/py/tima-mindif)
-[![pipeline status](https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor/badges/master/pipeline.svg)](https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor/commits/master)
-[![coverage report](https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor/badges/master/coverage.svg)](https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor/commits/master)
+
+# Tima Mindif Processor
+
+Processes a Tescan TIMA Mindif file to generate a classification panorama.
 
 ## Getting Started
 
@@ -64,7 +66,7 @@ optional arguments:
 ```
 
 The script should be executed in the following manner:
-tima-mindif tima_mindif_processor.py project/path mindif_root output_root
+tima-mindif project/path mindif_root output_root
 
 For example:
 
