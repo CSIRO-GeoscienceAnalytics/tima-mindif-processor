@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "tima-mindif-processor"
+version = "2.0.1"
+description = "Processes a Tescan TIMA Mindif file to generate a classification panorama."
+authors = ["Sam Bradley <sam.bradley@csiro.au>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "tima_mindif_processor"}]
+
+[tool.poetry.scripts]
+tima-mindif = "tima_mindif_processor.__main__:main"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pillow = ">= 8.1.0"
+loguru = "*"
+numpy = "*"
+
+
+[tool.poetry.group.dev.dependencies]
+twine = "*"
+flake8 = "*"
+pylint = "*"
+black = "*"
+gitchangelog = "*"
+pytest = "*"
+pytest-cov = "*"
+mock = "*"
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

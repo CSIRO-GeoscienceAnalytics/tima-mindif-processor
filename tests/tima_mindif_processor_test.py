@@ -3,7 +3,7 @@ import os, shutil
 import pytest
 import mock
 from loguru import logger
-from tima.tima_mindif_processor import tima_mindif_processor
+from tima_mindif_processor.tima_mindif_processor import tima_mindif_processor
 
 dirname = os.path.dirname(__file__)
 output_dir = os.path.join(dirname, "test_output")

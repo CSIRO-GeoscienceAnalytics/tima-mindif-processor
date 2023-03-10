@@ -43,9 +43,7 @@ Once it's installed use the command 'tima-mindif'
 ```
 tima-mindif -h
 
-usage: tima-mindif [-h] [--output OUTPUT] [--verbose] [--exclude-unclassified]
-                   [--show-low-val] [--thumbs]
-                   project_path mindif_root
+usage: tima-mindif [-h] [--output OUTPUT] [--verbose] [--exclude-unclassified] [--show-low-val] [--id-arrays] [--bse] [--thumbs] project_path mindif_root
 
 Process TIMA data
 
@@ -53,7 +51,7 @@ positional arguments:
   project_path          Path to the TIMA project
   mindif_root           Path to the MinDif root
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --output OUTPUT, -o OUTPUT
                         Path to the desired output folder
@@ -61,6 +59,8 @@ optional arguments:
   --exclude-unclassified, -u
                         Exclude unclassified rock types from image
   --show-low-val, -l    Prints rock types with <0.01 in the legend.
+  --id-arrays, -i       Generate Rock Type ID Arrays for each sample.
+  --bse, -b             Generate the stitched together BSE image.
   --thumbs              Create thumbnails.
 
 ```

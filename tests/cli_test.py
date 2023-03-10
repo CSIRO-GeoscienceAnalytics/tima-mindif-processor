@@ -1,5 +1,5 @@
 import pytest
-from tima.__main__ import parse_args
+from tima_mindif_processor.__main__ import parse_args
 
 
 def test_parse_args_none():
