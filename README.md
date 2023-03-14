@@ -1,10 +1,12 @@
-# TIMA Mindif Processor v2.0.1
+# `tima-mindif` v2.0.1
 
 [![PyPI version](https://badge.fury.io/py/tima-mindif.svg)](https://badge.fury.io/py/tima-mindif)
 
 # Tima Mindif Processor
 
-Processes a Tescan TIMA Mindif file to generate a classification panorama.
+**NOTE:** This repository is currently being migrated to Github and may still contain old references
+
+A command line tool to processes a Tescan TIMA Mindif file to generate a classification panorama.
 
 ## Getting Started
 
@@ -12,28 +14,6 @@ install from pypi
 
 ```
 pip install tima-mindif
-```
-
-Install direct from git (Note: this is currently a private repository)
-
-```
-pip install git+https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor.git
-```
-
-Or clone the repo so you can make changes or view the code, note the -e in the pip install is optional, it makes it so any code changes are automatically picked up.
-
-```
-git clone https://gitlab.com/csiro-geoanalytics/tima-utils/tima-mindif-processor.git
-<Navigate to the code directory>
-pip install -e .
-```
-
-If you would like to work on the code in a virtual env a pipfile is available
-
-```
-pip install pipenv
-pipenv install
-pipenv shell
 ```
 
 ## Usage
@@ -71,5 +51,5 @@ tima-mindif project/path mindif_root output_root
 For example:
 
 ```
-tima-mindif "/media/sf_Y_DRIVE/Data/Evolution" "/media/sf_Y_DRIVE/Data/Adam Brown" -o ./output
+tima-mindif "/my/project/path" "/my/project/path/mindif" -o ./output
 ```
